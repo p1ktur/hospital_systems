@@ -20,6 +20,8 @@ dependencies {
 
     // Koin
     implementation("io.insert-koin:koin-core:3.6.0-wasm-alpha2")
+    implementation("io.insert-koin:koin-core-coroutines:3.6.0-wasm-alpha2")
+    implementation("io.insert-koin:koin-compose:3.6.0-wasm-alpha2")
 
     // Postgres
     implementation("org.postgresql:postgresql:42.7.3")
@@ -32,6 +34,15 @@ dependencies {
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1-Beta")
+
+    // Icons
+    implementation(compose.materialIconsExtended)
+
+    // Resources
+    implementation(compose.components.resources)
+
+    // Material3
+    implementation("org.jetbrains.compose.material3:material3-desktop:1.2.1")
 }
 
 compose.desktop {
