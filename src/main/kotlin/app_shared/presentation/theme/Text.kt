@@ -1,8 +1,9 @@
 package app_shared.presentation.theme
 
-import androidx.compose.material3.Typography
+import androidx.compose.material3.*
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.*
+import androidx.compose.ui.text.style.*
 import androidx.compose.ui.unit.*
 
 val defaultTextStyle = TextStyle(

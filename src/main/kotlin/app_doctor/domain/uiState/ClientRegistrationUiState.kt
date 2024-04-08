@@ -1,4 +1,4 @@
-package app_client.domain.uiState
+package app_doctor.domain.uiState
 
 data class ClientRegistrationUiState(
     val name: String = "",

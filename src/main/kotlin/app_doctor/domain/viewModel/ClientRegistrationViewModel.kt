@@ -1,16 +1,16 @@
-package app_client.domain.viewModel
+package app_doctor.domain.viewModel
 
 import app_client.data.*
-import app_client.domain.uiEvent.*
-import app_client.domain.uiState.*
+import app_doctor.domain.uiEvent.*
+import app_doctor.domain.uiState.*
+import app_shared.domain.model.exceptions.*
 import app_shared.domain.model.regex.*
 import app_shared.domain.model.transactor.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import moe.tlaster.precompose.viewmodel.*
-import java.util.regex.*
 
-class ClientRegistrationViewModel(private val clientInfoRepository: ClientInfoRepository) : ViewModel() {
+class ClientRegistrationViewModel(private val clientLoginRegistrationRepository: ClientLoginRegistrationRepository) : ViewModel() {
 
     private val _uiState: MutableStateFlow<ClientRegistrationUiState> = MutableStateFlow(ClientRegistrationUiState())
     val uiState = _uiState.asStateFlow()
@@ -31,9 +31,6 @@ class ClientRegistrationViewModel(private val clientInfoRepository: ClientInfoRe
         }
     }
 
-    // Must fields - name, surname, age, address, phone, login, password
-    // Not must fields - father's name, email
-
     private fun register() {
         if (uiState.value.isLoading) return
 
@@ -43,8 +40,6 @@ class ClientRegistrationViewModel(private val clientInfoRepository: ClientInfoRe
             )
 
             val errorCodes = mutableListOf<Int>()
-
-            //1012 -> "This login is occupied already."
 
             if (uiState.value.name.isEmpty()) {
                 errorCodes.add(1001)
@@ -100,7 +95,7 @@ class ClientRegistrationViewModel(private val clientInfoRepository: ClientInfoRe
                     errorCodes = errorCodes
                 )
 
-                val registerResult = clientInfoRepository.register(
+                val registerResult = clientLoginRegistrationRepository.register(
                     name = uiState.value.name,
                     surname = uiState.value.surname,
                     fathersName = uiState.value.fathersName,
@@ -113,7 +108,19 @@ class ClientRegistrationViewModel(private val clientInfoRepository: ClientInfoRe
                 )
 
                 when (registerResult) {
-                    is TransactorResult.Failure -> println("Unable to register because: ${registerResult.exception?.message}")
+                    is TransactorResult.Failure -> {
+                        if (registerResult.exception is AlreadyExistsException) {
+                            errorCodes.add(registerResult.exception.code)
+                            _uiState.value = uiState.value.copy(
+                                errorCodes = errorCodes
+                            )
+                        }
+
+                        _uiState.value = uiState.value.copy(
+                            isLoading = false
+                        )
+                        println("Unable to register because: ${registerResult.exception?.message}")
+                    }
                     is TransactorResult.Success<*> -> {
                         _uiState.value = uiState.value.copy(
                             isLoading = false
@@ -129,39 +136,21 @@ class ClientRegistrationViewModel(private val clientInfoRepository: ClientInfoRe
         }
     }
 
-    private fun updateSurname(surname: String) {
-        _uiState.update { it.copy(surname = surname) }
-    }
+    private fun updateSurname(surname: String) = _uiState.update { it.copy(surname = surname) }
 
-    private fun updatePhone(phone: String) {
-        _uiState.update { it.copy(phone = phone) }
-    }
+    private fun updatePhone(phone: String) = _uiState.update { it.copy(phone = phone) }
 
-    private fun updatePassword(password: String) {
-        _uiState.update { it.copy(password = password) }
-    }
+    private fun updatePassword(password: String) = _uiState.update { it.copy(password = password) }
 
-    private fun updateName(name: String) {
-        _uiState.update { it.copy(name = name) }
-    }
+    private fun updateName(name: String) = _uiState.update { it.copy(name = name) }
 
-    private fun updateLogin(login: String) {
-        _uiState.update { it.copy(login = login) }
-    }
+    private fun updateLogin(login: String) = _uiState.update { it.copy(login = login) }
 
-    private fun updateFathersName(fathersName: String) {
-        _uiState.update { it.copy(fathersName = fathersName) }
-    }
+    private fun updateFathersName(fathersName: String) = _uiState.update { it.copy(fathersName = fathersName) }
 
-    private fun updateEmail(email: String) {
-        _uiState.update { it.copy(email = email) }
-    }
+    private fun updateEmail(email: String) = _uiState.update { it.copy(email = email) }
 
-    private fun updateAge(age: String) {
-        _uiState.update { it.copy(age = age) }
-    }
+    private fun updateAge(age: String) = _uiState.update { it.copy(age = age) }
 
-    private fun updateAddress(address: String) {
-        _uiState.update { it.copy(address = address) }
-    }
+    private fun updateAddress(address: String) = _uiState.update { it.copy(address = address) }
 }

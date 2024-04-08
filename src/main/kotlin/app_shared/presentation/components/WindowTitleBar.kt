@@ -12,13 +12,15 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.*
 import app_shared.domain.model.args.*
-import app_shared.domain.model.tabNavigator.*
+import app_shared.domain.model.theme.*
 import com.hospital.systems.hospitalsystems.generated.resources.*
 import org.jetbrains.compose.resources.*
 
 @Composable
 fun WindowScope.WindowTitleBar(
     appArgs: AppArgs,
+    theme: Theme,
+    onChangeTheme: () -> Unit,
     isMaximized: Boolean,
     onMinimize: () -> Unit,
     onMaximize: () -> Unit,
@@ -39,6 +41,8 @@ fun WindowScope.WindowTitleBar(
             ) {
                 TitleBarContent(
                     appArgs = appArgs,
+                    theme = theme,
+                    onChangeTheme = onChangeTheme,
                     onMinimize = onMinimize,
                     onMaximize = onMaximize,
                     onClose = onClose
@@ -58,6 +62,8 @@ fun WindowScope.WindowTitleBar(
                 ) {
                     TitleBarContent(
                         appArgs = appArgs,
+                        theme = theme,
+                        onChangeTheme = onChangeTheme,
                         onMinimize = onMinimize,
                         onMaximize = onMaximize,
                         onClose = onClose
@@ -78,6 +84,8 @@ fun WindowScope.WindowTitleBar(
 @Composable
 private fun TitleBarContent(
     appArgs: AppArgs,
+    theme: Theme,
+    onChangeTheme: () -> Unit,
     onMinimize: () -> Unit,
     onMaximize: () -> Unit,
     onClose: () -> Unit
@@ -104,6 +112,19 @@ private fun TitleBarContent(
         )
     }
     Row {
+        Icon(
+            modifier = Modifier
+                .fillMaxHeight()
+                .aspectRatio(1f)
+                .clickable(onClick = onChangeTheme)
+                .padding(4.dp),
+            imageVector = when (theme) {
+                Theme.LIGHT -> Icons.Default.LightMode
+                Theme.DARK -> Icons.Default.DarkMode
+            },
+            contentDescription = "Change theme",
+            tint = MaterialTheme.colorScheme.onSecondaryContainer
+        )
         Icon(
             modifier = Modifier
                 .fillMaxHeight()

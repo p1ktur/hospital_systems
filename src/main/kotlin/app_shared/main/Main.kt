@@ -3,13 +3,17 @@ package app_shared.main
 import androidx.compose.foundation.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.platform.*
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.*
+import app_admin.di.*
+import app_admin.presentation.navigation.*
 import app_client.di.*
 import app_client.presentation.navigation.*
+import app_doctor.di.*
+import app_doctor.presentation.navigation.*
 import app_shared.di.*
 import app_shared.domain.model.args.*
+import app_shared.domain.model.theme.*
 import app_shared.domain.model.transactor.*
 import app_shared.presentation.components.*
 import app_shared.presentation.theme.*
@@ -28,7 +32,9 @@ fun main(vararg args: String) {
     startKoin {
         modules(
             sharedModule,
-            clientModule
+            clientModule,
+            doctorModule,
+            adminModule
         )
     }
 
@@ -45,6 +51,9 @@ fun main(vararg args: String) {
             size = DpSize(1080.dp, 720.dp)
         )
 
+        val isSystemInDarkTheme = isSystemInDarkTheme()
+        var appTheme by remember { mutableStateOf(if (isSystemInDarkTheme) Theme.DARK else Theme.LIGHT) }
+
         var isMaximized by remember { mutableStateOf(false) }
         var isWindowResizeable by remember { mutableStateOf(true) }
         var lastPosition by remember { mutableStateOf(windowState.position) }
@@ -60,9 +69,13 @@ fun main(vararg args: String) {
             window.minimumSize = Dimension(1080, 720)
 
             PreComposeApp {
-                AppTheme {
+                AppTheme(appTheme) {
                     WindowTitleBar(
                         appArgs = parsedArgs,
+                        theme = appTheme,
+                        onChangeTheme = {
+                            appTheme = !appTheme
+                        },
                         isMaximized = isMaximized,
                         onMinimize = {
                             windowState.isMinimized = true
@@ -97,10 +110,10 @@ fun main(vararg args: String) {
                                 ClientNavigationScreen()
                             }
                             AppArgs.DOCTOR -> {
-
+                                DoctorNavigationScreen()
                             }
                             AppArgs.ADMIN -> {
-
+                                AdminNavigationScreen()
                             }
                         }
                     }

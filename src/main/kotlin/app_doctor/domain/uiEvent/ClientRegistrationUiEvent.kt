@@ -1,4 +1,4 @@
-package app_client.domain.uiEvent
+package app_doctor.domain.uiEvent
 
 sealed class ClientRegistrationUiEvent {
     data object Register : ClientRegistrationUiEvent()

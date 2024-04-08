@@ -6,7 +6,8 @@ import org.koin.dsl.*
 
 val clientModule = module {
     single { ClientInfoRepository(get()) }
+    single { ClientLoginRegistrationRepository(get()) }
 
     single { ClientInfoViewModel(get()) }
-    single { ClientRegistrationViewModel(get()) }
+    single { ClientLoginViewModel(get()) }
 }

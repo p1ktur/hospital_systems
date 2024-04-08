@@ -6,9 +6,9 @@ interface ITransactor {
 
     fun checkStatus()
 
-    fun <T> startTransaction(
-        transaction: Connection.() -> TransactorResult.Success<T>,
+    fun startTransaction(
         onSQLException: ((SQLException) -> Unit)? = null,
-        onException: ((Exception) -> Unit)? = null
+        onException: ((Exception) -> Unit)? = null,
+        transaction: Connection.() -> TransactorResult
     ): TransactorResult
 }

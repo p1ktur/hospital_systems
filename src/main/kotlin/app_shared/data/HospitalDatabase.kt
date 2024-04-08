@@ -38,10 +38,10 @@ class HospitalDatabase : AutoCloseable, ITransactor {
         }
     }
 
-    override fun <T> startTransaction(
-        transaction: Connection.() -> TransactorResult.Success<T>,
+    override fun startTransaction(
         onSQLException: ((SQLException) -> Unit)?,
-        onException: ((Exception) -> Unit)?
+        onException: ((Exception) -> Unit)?,
+        transaction: Connection.() -> TransactorResult
     ): TransactorResult = try {
         connection.transaction()
     } catch (e: SQLException) {
@@ -60,5 +60,7 @@ class HospitalDatabase : AutoCloseable, ITransactor {
         onException?.invoke(e)
 
         TransactorResult.Failure(e)
+    } finally {
+        connection.commit()
     }
 }

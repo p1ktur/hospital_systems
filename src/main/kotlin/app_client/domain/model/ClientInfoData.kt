@@ -1,6 +1,6 @@
-package app_client.domain.uiState
+package app_client.domain.model
 
-data class ClientInfoUiState(
+data class ClientInfoData(
     val name: String = "",
     val surname: String = "",
     val fathersName: String = "",
@@ -14,5 +14,4 @@ data class ClientInfoUiState(
     val isHospitalized: Boolean = false,
     val pendingPayments: Int = 0,
     val payedPayments: Int = 0,
-    val isLoading: Boolean = false
 )
