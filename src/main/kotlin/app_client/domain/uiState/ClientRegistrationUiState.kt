@@ -1,4 +1,6 @@
-package app_doctor.domain.uiState
+package app_client.domain.uiState
+
+import app_shared.domain.model.result.*
 
 data class ClientRegistrationUiState(
     val name: String = "",
@@ -11,5 +13,6 @@ data class ClientRegistrationUiState(
     val login: String = "",
     val password: String = "",
     val errorCodes: List<Int> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val registrationResult: TaskResult = TaskResult.NotCompleted
 )

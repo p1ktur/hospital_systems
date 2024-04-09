@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.*
 import app_client.domain.uiEvent.*
 import app_client.domain.uiState.*
@@ -23,7 +24,11 @@ fun ClientLoginScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 32.dp)
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(rememberScrollState())
+            .onKeyEvent { keyEvent ->
+                if (keyEvent.key == Key.Enter) onUiEvent(ClientLoginUiEvent.Login)
+                false
+            },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

@@ -1,13 +1,14 @@
-package app_doctor.presentation.screens
+package app_client.presentation.screens
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.*
-import app_doctor.domain.uiEvent.*
-import app_doctor.domain.uiState.*
+import app_client.domain.uiEvent.*
+import app_client.domain.uiState.*
 import app_shared.presentation.codes.*
 import app_shared.presentation.components.*
 import app_shared.presentation.theme.*
@@ -23,7 +24,11 @@ fun ClientRegistrationScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 32.dp)
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(rememberScrollState())
+            .onKeyEvent { keyEvent ->
+                if (keyEvent.key == Key.Enter) onUiEvent(ClientRegistrationUiEvent.Register)
+                false
+            },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

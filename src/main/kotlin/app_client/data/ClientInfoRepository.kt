@@ -81,4 +81,30 @@ class ClientInfoRepository(private val transactor: ITransactor) {
         )
         TransactorResult.Success(clientInfoData)
     }
+
+    fun saveChanges(
+        userClientId: Int,
+        name: String,
+        surname: String,
+        fathersName: String,
+        age: String,
+        address: String,
+        phone: String,
+        email: String
+    ): TransactorResult = transactor.startTransaction {
+        val updateStatement = prepareStatement("UPDATE patient SET name = ?, surname = ?, fathers_name = ?, age = ?, address = ?, phone = ?, email = ? " +
+                "FROM medical_card, user_client " +
+                "WHERE user_client.id = ? AND user_client.medical_card_id = medical_card.id AND medical_card.patient_id = patient.id")
+        updateStatement.setString(1, name)
+        updateStatement.setString(2, surname)
+        updateStatement.setString(3, fathersName)
+        updateStatement.setInt(4, age.toInt())
+        updateStatement.setString(5, address)
+        updateStatement.setString(6, phone)
+        updateStatement.setString(7, email)
+        updateStatement.setInt(8, userClientId)
+        updateStatement.executeUpdate()
+
+        TransactorResult.Success(userClientId)
+    }
 }

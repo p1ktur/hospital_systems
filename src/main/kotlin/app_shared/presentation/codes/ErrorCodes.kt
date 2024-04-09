@@ -1,5 +1,12 @@
 package app_shared.presentation.codes
 
+fun parseDefaultErrorCode(code: Int): String {
+    return when (code) {
+        1001 -> "Couldn't load resource."
+        else -> "Unknown error."
+    }
+}
+
 fun parseLoginErrorCode(code: Int): String {
     return when (code) {
         1009 -> "Please enter login."

@@ -15,57 +15,70 @@ fun AdminNavigationScreen() {
     val navigator = rememberNavigator()
 
     var isLoading by remember { mutableStateOf(false) }
+    val canGoBack by navigator.canGoBack.collectAsState(false)
 
     TabNavigator(
         navOptions = listOf(
             TabNavOption(
                 name = "Register worker",
-                route = "/registration"
+                route = "/registration_worker"
             ),
-//            TabNavOption(
-//                name = "Appointments",
-//                route = "/appointments/${(loginStatus as? ClientLoginStatus.LoggedIn)?.userClientId}"
-//            ),
-//            TabNavOption(
-//                name = "Hospitalizations",
-//                route = "/hospitalizations/${(loginStatus as? ClientLoginStatus.LoggedIn)?.userClientId}"
-//            ),
-//            TabNavOption(
-//                name = "Payments",
-//                route = "/payments/${(loginStatus as? ClientLoginStatus.LoggedIn)?.userClientId}"
-//            )
+            TabNavOption(
+                name = "Find worker",
+                route = "/find_worker"
+            ),
+            TabNavOption(
+                name = "Register patient",
+                route = "/registration_patient"
+            ),
+            TabNavOption(
+                name = "Find patient",
+                route = "/find_patient"
+            ),
+            TabNavOption(
+                name = "Appointments",
+                route = "/appointments"
+            ),
+            TabNavOption(
+                name = "Hospitalizations",
+                route = "/hospitalizations"
+            ),
+            TabNavOption(
+                name = "Payments",
+                route = "/payments"
+            ),
+            TabNavOption(
+                name = "Drugs",
+                route = "/drugs"
+            ),
+            TabNavOption(
+                name = "Rooms",
+                route = "/rooms"
+            ),
+            TabNavOption(
+                name = "Equipment",
+                route = "/equipment"
+            ),
+            TabNavOption(
+                name = "Statistics",
+                route = "/statistics"
+            ),
         ),
         onNavigate = { route ->
             navigator.navigate(route)
         },
+        onNavigateBack = {
+            navigator.goBack()
+        },
+        canGoBack = canGoBack,
         isLoading = isLoading
     ) {
         NavHost(
             modifier = Modifier.fillMaxSize(),
             navigator = navigator,
-            initialRoute = "/registration"
+            initialRoute = "/registration_worker"
         ) {
-//            scene(route = "/login") {
-//                val viewModel = koinViewModel<ClientLoginViewModel>()
-//                val uiState = viewModel.uiState.collectAsState()
-//
-//                LaunchedEffect(key1 = uiState.value.isLoading, block = {
-//                    isLoading = uiState.value.isLoading
-//                })
-//
-//                LaunchedEffect(key1 = uiState.value.clientLoginStatus, block = {
-//                    loginStatus = uiState.value.clientLoginStatus
-//                })
-//
-//                ClientLoginScreen(
-//                    navigator = navigator,
-//                    uiState = uiState.value,
-//                    onUiEvent = { event ->
-//                        viewModel.onUiEvent(event)
-//                    }
-//                )
-//            }
-            scene(route = "/registration") { navBackStackEntry ->
+            scene(route = "/registration_worker") {
                 val viewModel = koinViewModel<WorkerRegistrationViewModel>()
                 val uiState = viewModel.uiState.collectAsState()
 
@@ -80,6 +93,36 @@ fun AdminNavigationScreen() {
                         viewModel.onUiEvent(event)
                     }
                 )
+            }
+            scene(route = "/find_worker") {
+
+            }
+            scene(route = "/registration_patient") {
+
+            }
+            scene(route = "/find_patient") {
+
+            }
+            scene(route = "/appointments") {
+
+            }
+            scene(route = "/hospitalizations") {
+
+            }
+            scene(route = "/payments") {
+
+            }
+            scene(route = "/drugs") {
+
+            }
+            scene(route = "/rooms") {
+
+            }
+            scene(route = "/equipment") {
+
+            }
+            scene(route = "/statistics") {
+
             }
         }
     }

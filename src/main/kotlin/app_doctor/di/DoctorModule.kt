@@ -7,6 +7,5 @@ import org.koin.dsl.*
 val doctorModule = module {
     single { DoctorLoginRegistrationRepository(get()) }
 
-    single { ClientRegistrationViewModel(get()) }
-    single { DoctorLoginViewModel(get()) }
+    factory { DoctorLoginViewModel(get()) }
 }

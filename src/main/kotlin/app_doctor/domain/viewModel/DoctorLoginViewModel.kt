@@ -1,6 +1,7 @@
 package app_doctor.domain.viewModel
 
 import app_doctor.data.*
+import app_doctor.domain.model.*
 import app_doctor.domain.uiEvent.*
 import app_doctor.domain.uiState.*
 import app_shared.domain.model.exceptions.*
@@ -70,7 +71,9 @@ class DoctorLoginViewModel(private val doctorLoginRegistrationRepository: Doctor
                         )
                     }
                     is TransactorResult.Success<*> -> {
+                        val userDoctorId = loginResult.data as Int
                         _uiState.value = uiState.value.copy(
+                            doctorLoginStatus = DoctorLoginStatus.LoggedIn(userDoctorId),
                             isLoading = false
                         )
                     }

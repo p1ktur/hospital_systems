@@ -7,5 +7,5 @@ import org.koin.dsl.*
 val adminModule = module {
     single { WorkerRegistrationRepository(get()) }
 
-    single { WorkerRegistrationViewModel(get()) }
+    factory { WorkerRegistrationViewModel(get()) }
 }

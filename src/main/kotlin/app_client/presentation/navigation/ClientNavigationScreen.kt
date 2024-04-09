@@ -17,21 +17,30 @@ fun ClientNavigationScreen() {
     val navigator = rememberNavigator()
 
     var isLoading by remember { mutableStateOf(false) }
-    var isTabVisible by remember { mutableStateOf(false) }
+    val canGoBack by navigator.canGoBack.collectAsState(false)
 
     var loginStatus by remember { mutableStateOf<ClientLoginStatus>(ClientLoginStatus.LoggedOut) }
 
-    LaunchedEffect(key1 = loginStatus, block = {
-        when (loginStatus) {
-            is ClientLoginStatus.LoggedIn -> {
-                isTabVisible = true
-                navigator.navigate("/info/${(loginStatus as ClientLoginStatus.LoggedIn).userClientId}")
-            }
-            ClientLoginStatus.LoggedOut -> Unit
-        }
-    })
+    if (loginStatus is ClientLoginStatus.LoggedOut) {
+        val viewModel = koinViewModel<ClientLoginViewModel>()
+        val uiState = viewModel.uiState.collectAsState()
 
-    TabNavigator(
+        LaunchedEffect(key1 = uiState.value.isLoading, block = {
+            isLoading = uiState.value.isLoading
+        })
+
+        LaunchedEffect(key1 = uiState.value.clientLoginStatus, block = {
+            loginStatus = uiState.value.clientLoginStatus
+        })
+
+        ClientLoginScreen(
+            navigator = navigator,
+            uiState = uiState.value,
+            onUiEvent = { event ->
+                viewModel.onUiEvent(event)
+            }
+        )
+    } else TabNavigator(
         navOptions = listOf(
             TabNavOption(
                 name = "Info",
@@ -53,34 +62,17 @@ fun ClientNavigationScreen() {
         onNavigate = { route ->
             navigator.navigate(route)
         },
-        isLoading = isLoading,
-        isVisible = isTabVisible
+        onNavigateBack = {
+            navigator.goBack()
+        },
+        canGoBack = canGoBack,
+        isLoading = isLoading
     ) {
         NavHost(
             modifier = Modifier.fillMaxSize(),
             navigator = navigator,
-            initialRoute = "/login"
+            initialRoute = "/info/${(loginStatus as? ClientLoginStatus.LoggedIn)?.userClientId}"
         ) {
-            scene(route = "/login") {
-                val viewModel = koinViewModel<ClientLoginViewModel>()
-                val uiState = viewModel.uiState.collectAsState()
-
-                LaunchedEffect(key1 = uiState.value.isLoading, block = {
-                    isLoading = uiState.value.isLoading
-                })
-
-                LaunchedEffect(key1 = uiState.value.clientLoginStatus, block = {
-                    loginStatus = uiState.value.clientLoginStatus
-                })
-
-                ClientLoginScreen(
-                    navigator = navigator,
-                    uiState = uiState.value,
-                    onUiEvent = { event ->
-                        viewModel.onUiEvent(event)
-                    }
-                )
-            }
             scene(route = "/info/{userClientId}") { navBackStackEntry ->
                 val userClientId = navBackStackEntry.path<Int>("userClientId") ?: -1
                 val viewModel = koinViewModel<ClientInfoViewModel>()
@@ -99,7 +91,9 @@ fun ClientNavigationScreen() {
                     uiState = uiState.value,
                     onUiEvent = { event ->
                         viewModel.onUiEvent(event)
-                    }
+                    },
+                    userClientId = userClientId,
+                    isRemote = false
                 )
             }
             scene(route = "/appointments/{userClientId}") { navBackStackEntry ->

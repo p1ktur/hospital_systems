@@ -1,10 +1,11 @@
-package app_doctor.domain.viewModel
+package app_client.domain.viewModel
 
 import app_client.data.*
-import app_doctor.domain.uiEvent.*
-import app_doctor.domain.uiState.*
+import app_client.domain.uiEvent.*
+import app_client.domain.uiState.*
 import app_shared.domain.model.exceptions.*
 import app_shared.domain.model.regex.*
+import app_shared.domain.model.result.*
 import app_shared.domain.model.transactor.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -18,6 +19,7 @@ class ClientRegistrationViewModel(private val clientLoginRegistrationRepository:
     fun onUiEvent(event: ClientRegistrationUiEvent) {
         when (event) {
             ClientRegistrationUiEvent.Register -> register()
+            ClientRegistrationUiEvent.ForgetRegistration -> forgetRegistration()
 
             is ClientRegistrationUiEvent.UpdateAddress -> updateAddress(event.address)
             is ClientRegistrationUiEvent.UpdateAge -> updateAge(event.age)
@@ -122,8 +124,10 @@ class ClientRegistrationViewModel(private val clientLoginRegistrationRepository:
                         println("Unable to register because: ${registerResult.exception?.message}")
                     }
                     is TransactorResult.Success<*> -> {
+                        val userClientId = registerResult.data as Int
                         _uiState.value = uiState.value.copy(
-                            isLoading = false
+                            isLoading = false,
+                            registrationResult = TaskResult.Success(userClientId)
                         )
                     }
                 }
@@ -134,6 +138,12 @@ class ClientRegistrationViewModel(private val clientLoginRegistrationRepository:
                 )
             }
         }
+    }
+
+    private fun forgetRegistration() {
+        _uiState.value = uiState.value.copy(
+            registrationResult = TaskResult.NotCompleted
+        )
     }
 
     private fun updateSurname(surname: String) = _uiState.update { it.copy(surname = surname) }

@@ -1,7 +1,8 @@
-package app_doctor.domain.uiEvent
+package app_client.domain.uiEvent
 
 sealed class ClientRegistrationUiEvent {
     data object Register : ClientRegistrationUiEvent()
+    data object ForgetRegistration : ClientRegistrationUiEvent()
 
     data class UpdateName(val name: String) : ClientRegistrationUiEvent()
     data class UpdateSurname(val surname: String) : ClientRegistrationUiEvent()

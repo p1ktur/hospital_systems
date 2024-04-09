@@ -15,32 +15,32 @@ class ClientLoginRegistrationRepository(private val transactor: ITransactor) {
         email: String,
         login: String,
         password: String
-    ): TransactorResult = transactor.startTransaction(
-        transaction = {
-            val checkStatement = prepareStatement("SELECT COUNT(login) FROM public.user WHERE login = ?")
-            checkStatement.setString(1, login)
+    ): TransactorResult = transactor.startTransaction {
+        val checkStatement = prepareStatement("SELECT COUNT(login) FROM public.user WHERE login = ?")
+        checkStatement.setString(1, login)
 
-            val checkResult = checkStatement.executeQuery()
-            checkResult.next()
-            if (checkResult.getInt(1) != 0) {
-                return@startTransaction TransactorResult.Failure(AlreadyExistsException(1012, "Login is occupied"))
-            }
-
-            val registerStatement = prepareStatement("SELECT registerPatient(?, ?, ?, ?, ?, ?, ?, ?, ?)")
-            registerStatement.setString(1, name)
-            registerStatement.setString(2, surname)
-            registerStatement.setString(3, fathersName)
-            registerStatement.setInt(4, age.toInt())
-            registerStatement.setString(5, address)
-            registerStatement.setString(6, phone)
-            registerStatement.setString(7, email)
-            registerStatement.setString(8, login)
-            registerStatement.setString(9, password)
-            registerStatement.executeQuery()
-
-            TransactorResult.Success("Success")
+        val checkResult = checkStatement.executeQuery()
+        checkResult.next()
+        if (checkResult.getInt(1) != 0) {
+            return@startTransaction TransactorResult.Failure(AlreadyExistsException(1012, "Login is occupied"))
         }
-    )
+
+        val registerStatement = prepareStatement("SELECT registerPatient(?, ?, ?, ?, ?, ?, ?, ?, ?)")
+        registerStatement.setString(1, name)
+        registerStatement.setString(2, surname)
+        registerStatement.setString(3, fathersName)
+        registerStatement.setInt(4, age.toInt())
+        registerStatement.setString(5, address)
+        registerStatement.setString(6, phone)
+        registerStatement.setString(7, email)
+        registerStatement.setString(8, login)
+        registerStatement.setString(9, password)
+        val registerResult = registerStatement.executeQuery()
+        registerResult.next()
+
+        TransactorResult.Success(registerResult.getInt(1))
+    }
+
 
     fun login(login: String, password: String): TransactorResult = transactor.startTransaction {
         val checkStatement = prepareStatement("SELECT user_client.id FROM public.user INNER JOIN user_client ON public.user.id = user_client.user_id WHERE public.user.login = ? AND public.user.password = ?")
