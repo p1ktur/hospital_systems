@@ -1,4 +1,4 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.compose.desktop.application.dsl.*
 
 plugins {
     kotlin("jvm")
@@ -43,6 +43,9 @@ dependencies {
 
     // Material3
     implementation("org.jetbrains.compose.material3:material3-desktop:1.2.1")
+
+    // CSV
+    implementation("com.opencsv:opencsv:5.3")
 }
 
 compose.desktop {

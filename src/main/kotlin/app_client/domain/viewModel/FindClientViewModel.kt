@@ -28,7 +28,7 @@ class FindClientViewModel(private val findClientRepository: FindClientRepository
         _uiState.value = uiState.value.copy(
             searchText = text,
             clientSearchData = fetchedClientData.filter {
-                (it.name + it.surname + it.login + it.phone + it.age).lowercase().contains(text.lowercase())
+                (it.name + it.surname + it.login + it.phone + it.age).contains(text, ignoreCase = true)
             }
         )
     }

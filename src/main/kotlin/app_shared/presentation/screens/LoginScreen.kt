@@ -1,4 +1,4 @@
-package app_client.presentation.screens
+package app_shared.presentation.screens
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -7,18 +7,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.*
-import app_client.domain.uiEvent.*
-import app_client.domain.uiState.*
+import app_shared.domain.uiEvent.*
+import app_shared.domain.uiState.*
 import app_shared.presentation.codes.*
 import app_shared.presentation.components.*
 import app_shared.presentation.theme.*
-import moe.tlaster.precompose.navigation.*
 
 @Composable
-fun ClientLoginScreen(
-    navigator: Navigator,
-    uiState: ClientLoginUiState,
-    onUiEvent: (ClientLoginUiEvent) -> Unit
+fun LoginScreen(
+    uiState: LoginUiState,
+    onUiEvent: (LoginUiEvent) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -26,7 +24,7 @@ fun ClientLoginScreen(
             .padding(horizontal = 32.dp)
             .verticalScroll(rememberScrollState())
             .onKeyEvent { keyEvent ->
-                if (keyEvent.key == Key.Enter) onUiEvent(ClientLoginUiEvent.Login)
+                if (keyEvent.key == Key.Enter) onUiEvent(LoginUiEvent.Login)
                 false
             },
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -52,14 +50,14 @@ fun ClientLoginScreen(
         LoginRegistrationTextField(
             label = "Login*",
             startValue = uiState.login,
-            onValueChange = { newValue -> onUiEvent(ClientLoginUiEvent.UpdateLogin(newValue)) },
+            onValueChange = { newValue -> onUiEvent(LoginUiEvent.UpdateLogin(newValue)) },
             errorText = if (uiState.errorCodes.contains(1009)) parseLoginErrorCode(1009) else null
         )
         Spacer(modifier = Modifier.height(32.dp))
         LoginRegistrationTextField(
             label = "Password*",
             startValue = uiState.password,
-            onValueChange = { newValue -> onUiEvent(ClientLoginUiEvent.UpdatePassword(newValue)) },
+            onValueChange = { newValue -> onUiEvent(LoginUiEvent.UpdatePassword(newValue)) },
             isPassword = true,
             errorText = if (uiState.errorCodes.contains(1010)) parseLoginErrorCode(1010) else null
         )
@@ -67,7 +65,7 @@ fun ClientLoginScreen(
         Button(
             modifier = Modifier.width(160.dp),
             onClick = {
-                onUiEvent(ClientLoginUiEvent.Login)
+                onUiEvent(LoginUiEvent.Login)
             },
             colors = buttonColors()
         ) {

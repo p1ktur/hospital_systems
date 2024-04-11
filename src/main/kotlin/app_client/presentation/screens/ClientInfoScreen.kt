@@ -18,7 +18,6 @@ import moe.tlaster.precompose.navigation.*
 
 @Composable
 fun ClientInfoScreen(
-    navigator: Navigator,
     uiState: ClientInfoUiState,
     onUiEvent: (ClientInfoUiEvent) -> Unit,
     userClientId: Int,

@@ -95,7 +95,8 @@ class ClientInfoViewModel(private val clientInfoRepository: ClientInfoRepository
                 is TransactorResult.Success<*> -> {
                     _uiState.value = uiState.value.copy(
                         editMode = false,
-                        isLoading = false
+                        isLoading = false,
+                        errorCodes = emptyList()
                     )
                 }
             }

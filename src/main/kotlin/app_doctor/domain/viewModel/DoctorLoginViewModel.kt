@@ -1,26 +1,26 @@
 package app_doctor.domain.viewModel
 
 import app_doctor.data.*
-import app_doctor.domain.model.*
-import app_doctor.domain.uiEvent.*
-import app_doctor.domain.uiState.*
 import app_shared.domain.model.exceptions.*
+import app_shared.domain.model.login.*
 import app_shared.domain.model.transactor.*
+import app_shared.domain.uiEvent.*
+import app_shared.domain.uiState.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import moe.tlaster.precompose.viewmodel.*
 
-class DoctorLoginViewModel(private val doctorLoginRegistrationRepository: DoctorLoginRegistrationRepository) : ViewModel() {
+class DoctorLoginViewModel(private val doctorLoginRepository: DoctorLoginRepository) : ViewModel() {
 
-    private val _uiState: MutableStateFlow<DoctorLoginUiState> = MutableStateFlow(DoctorLoginUiState())
+    private val _uiState: MutableStateFlow<LoginUiState> = MutableStateFlow(LoginUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun onUiEvent(event: DoctorLoginUiEvent) {
+    fun onUiEvent(event: LoginUiEvent) {
         when (event) {
-            DoctorLoginUiEvent.Login -> login()
+            LoginUiEvent.Login -> login()
 
-            is DoctorLoginUiEvent.UpdateLogin -> updateLogin(event.login)
-            is DoctorLoginUiEvent.UpdatePassword -> updatePassword(event.password)
+            is LoginUiEvent.UpdateLogin -> updateLogin(event.login)
+            is LoginUiEvent.UpdatePassword -> updatePassword(event.password)
         }
     }
 
@@ -52,7 +52,7 @@ class DoctorLoginViewModel(private val doctorLoginRegistrationRepository: Doctor
                     errorCodes = errorCodes
                 )
 
-                val loginResult = doctorLoginRegistrationRepository.login(
+                val loginResult = doctorLoginRepository.login(
                     login = uiState.value.login,
                     password = uiState.value.password,
                 )
@@ -71,9 +71,8 @@ class DoctorLoginViewModel(private val doctorLoginRegistrationRepository: Doctor
                         )
                     }
                     is TransactorResult.Success<*> -> {
-                        val userDoctorId = loginResult.data as Int
                         _uiState.value = uiState.value.copy(
-                            doctorLoginStatus = DoctorLoginStatus.LoggedIn(userDoctorId),
+                            loginStatus = LoginStatus.LoggedIn(loginResult.data as Int),
                             isLoading = false
                         )
                     }

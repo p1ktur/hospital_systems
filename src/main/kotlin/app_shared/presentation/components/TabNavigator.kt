@@ -20,8 +20,9 @@ fun TabNavigator(
     isVisible: Boolean = true,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val chosenIndicesStack = remember { mutableStateListOf<Int>() }
+    val chosenIndicesStack = remember { mutableStateListOf(0) }
     var chosenIndex by remember { mutableIntStateOf(0) }
+    var currentRoute by remember { mutableStateOf(navOptions.firstOrNull()?.route) }
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -42,7 +43,10 @@ fun TabNavigator(
                                 chosenIndex = index
                                 chosenIndicesStack.add(index)
 
-                                onNavigate(tabNavOption.route)
+                                if (currentRoute != tabNavOption.route) {
+                                    currentRoute = tabNavOption.route
+                                    onNavigate(tabNavOption.route)
+                                }
                             })
                             .then(
                                 if (chosenIndex == index) {

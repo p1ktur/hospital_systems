@@ -16,7 +16,6 @@ import moe.tlaster.precompose.navigation.*
 
 @Composable
 fun ClientRegistrationScreen(
-    navigator: Navigator,
     uiState: ClientRegistrationUiState,
     onUiEvent: (ClientRegistrationUiEvent) -> Unit
 ) {

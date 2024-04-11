@@ -91,14 +91,14 @@ class WorkerRegistrationViewModel(private val workerRegistrationRepository: Work
                 }
             }
 
-            if (uiState.value.password.isNotEmpty() && uiState.value.password.length < 8) {
-                errorCodes.add(1011)
+            if (uiState.value.login.isEmpty()) {
+                errorCodes.add(1009)
             }
 
-            if (uiState.value.password.isEmpty() && uiState.value.login.isNotEmpty()) {
-                errorCodes.add(1017)
-            } else if (uiState.value.password.isNotEmpty() && uiState.value.login.isEmpty()) {
-                errorCodes.add(1016)
+            if (uiState.value.password.isEmpty()) {
+                errorCodes.add(1010)
+            } else if (uiState.value.password.length < 8) {
+                errorCodes.add(1011)
             }
 
             _uiState.value = uiState.value.copy(

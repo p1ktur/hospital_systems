@@ -102,10 +102,10 @@ private fun TitleBarContent(
         )
         Text(
             modifier = Modifier.padding(8.dp),
-            text = when (appArgs) {
-                AppArgs.CLIENT -> "Client app"
-                AppArgs.DOCTOR -> "Doctor app"
-                AppArgs.ADMIN -> "Admin app"
+            text = "Hospital Systems" + when (appArgs) {
+                AppArgs.CLIENT -> ". Client app"
+                AppArgs.DOCTOR -> ". Doctor app"
+                AppArgs.ADMIN -> ". Admin app"
             },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSecondaryContainer

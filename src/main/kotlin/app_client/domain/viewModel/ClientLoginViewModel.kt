@@ -1,26 +1,26 @@
 package app_client.domain.viewModel
 
 import app_client.data.*
-import app_client.domain.model.*
-import app_client.domain.uiEvent.*
-import app_client.domain.uiState.*
 import app_shared.domain.model.exceptions.*
+import app_shared.domain.model.login.*
 import app_shared.domain.model.transactor.*
+import app_shared.domain.uiEvent.*
+import app_shared.domain.uiState.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import moe.tlaster.precompose.viewmodel.*
 
 class ClientLoginViewModel(private val clientLoginRegistrationRepository: ClientLoginRegistrationRepository) : ViewModel() {
 
-    private val _uiState: MutableStateFlow<ClientLoginUiState> = MutableStateFlow(ClientLoginUiState())
+    private val _uiState: MutableStateFlow<LoginUiState> = MutableStateFlow(LoginUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun onUiEvent(event: ClientLoginUiEvent) {
+    fun onUiEvent(event: LoginUiEvent) {
         when (event) {
-            ClientLoginUiEvent.Login -> login()
+            LoginUiEvent.Login -> login()
 
-            is ClientLoginUiEvent.UpdateLogin -> updateLogin(event.login)
-            is ClientLoginUiEvent.UpdatePassword -> updatePassword(event.password)
+            is LoginUiEvent.UpdateLogin -> updateLogin(event.login)
+            is LoginUiEvent.UpdatePassword -> updatePassword(event.password)
         }
     }
 
@@ -73,7 +73,7 @@ class ClientLoginViewModel(private val clientLoginRegistrationRepository: Client
                     is TransactorResult.Success<*> -> {
                         _uiState.value = uiState.value.copy(
                             isLoading = false,
-                            clientLoginStatus = ClientLoginStatus.LoggedIn(loginResult.data as Int)
+                            loginStatus = LoginStatus.LoggedIn(loginResult.data as Int)
                         )
                     }
                 }

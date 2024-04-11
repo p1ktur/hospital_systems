@@ -11,6 +11,7 @@ import app_client.di.*
 import app_client.presentation.navigation.*
 import app_doctor.di.*
 import app_doctor.presentation.navigation.*
+import app_shared.data.*
 import app_shared.di.*
 import app_shared.domain.model.args.*
 import app_shared.domain.model.theme.*
@@ -18,6 +19,7 @@ import app_shared.domain.model.transactor.*
 import app_shared.presentation.components.*
 import app_shared.presentation.theme.*
 import com.hospital.systems.hospitalsystems.generated.resources.*
+import kotlinx.coroutines.*
 import moe.tlaster.precompose.*
 import org.jetbrains.compose.resources.*
 import org.koin.compose.*
@@ -39,11 +41,20 @@ fun main(vararg args: String) {
     }
 
     application {
+        val coroutineScope = rememberCoroutineScope()
         val transactorForInit = koinInject<ITransactor>(parameters = { parametersOf(parsedArgs) })
 
         LaunchedEffect(key1 = true, block = {
             transactorForInit.checkStatus()
         })
+
+        if (args.asList().contains("init_db")) {
+            val databaseInitializer = koinInject<DatabaseInitializer>()
+            coroutineScope.launch(Dispatchers.IO) {
+                databaseInitializer.initDatabaseWithData()
+            }
+            return@application
+        }
 
         val windowState = rememberWindowState(
             placement = WindowPlacement.Floating,

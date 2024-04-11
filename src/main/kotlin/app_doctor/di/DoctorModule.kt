@@ -5,7 +5,13 @@ import app_doctor.domain.viewModel.*
 import org.koin.dsl.*
 
 val doctorModule = module {
-    single { DoctorLoginRegistrationRepository(get()) }
+    single { DoctorLoginRepository(get()) }
+    single { FindDoctorRepository(get()) }
+    single { DoctorInfoRepository(get()) }
+    single { DoctorScheduleRepository(get()) }
 
     factory { DoctorLoginViewModel(get()) }
+    factory { FindDoctorViewModel(get()) }
+    factory { DoctorInfoViewModel(get(), get()) }
+    factory { DoctorScheduleViewModel(get()) }
 }

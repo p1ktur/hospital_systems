@@ -15,7 +15,6 @@ import moe.tlaster.precompose.navigation.*
 
 @Composable
 fun WorkerRegistrationScreen(
-    navigator: Navigator,
     uiState: WorkerRegistrationUiState,
     onUiEvent: (WorkerRegistrationUiEvent) -> Unit
 ) {

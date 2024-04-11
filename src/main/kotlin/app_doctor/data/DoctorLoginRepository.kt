@@ -3,7 +3,7 @@ package app_doctor.data
 import app_shared.domain.model.exceptions.*
 import app_shared.domain.model.transactor.*
 
-class DoctorLoginRegistrationRepository(private val transactor: ITransactor) {
+class DoctorLoginRepository(private val transactor: ITransactor) {
 
     fun login(
         login: String,

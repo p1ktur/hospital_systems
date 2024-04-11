@@ -3,6 +3,7 @@ package app_shared.presentation.codes
 fun parseDefaultErrorCode(code: Int): String {
     return when (code) {
         1001 -> "Couldn't load resource."
+        1002 -> "Specify schedule fully."
         else -> "Unknown error."
     }
 }
@@ -45,13 +46,13 @@ fun parseWorkerRegistrationErrorCode(code: Int): String {
         1006 -> "Please enter the phone."
         1007 -> "Invalid phone number."
         1008 -> "Invalid email."
+        1009 -> "Please enter login."
+        1010 -> "Please enter password."
         1011 -> "Password is too short."
         1012 -> "This login is occupied already."
         1013 -> "Wrong login or password."
         1014 -> "Salary must be a positive number."
         1015 -> "Please enter the position."
-        1016 -> "Enter login too."
-        1017 -> "Enter password too."
         else -> "Unknown error."
     }
 }
