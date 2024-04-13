@@ -11,18 +11,19 @@ import app_client.presentation.screens.*
 import app_doctor.domain.uiEvent.*
 import app_doctor.domain.viewModel.*
 import app_doctor.presentation.screens.*
+import app_shared.domain.model.args.*
 import app_shared.domain.model.result.*
 import app_shared.domain.model.tabNavigator.*
-import app_shared.presentation.components.*
+import app_shared.domain.uiEvent.*
+import app_shared.domain.viewModel.*
+import app_shared.presentation.components.common.*
+import app_shared.presentation.screens.*
 import moe.tlaster.precompose.koin.*
 import moe.tlaster.precompose.navigation.*
 
 @Composable
 fun AdminNavigationScreen() {
-    val navigator = rememberNavigator()
-
     var isLoading by remember { mutableStateOf(false) }
-    val canGoBack by navigator.canGoBack.collectAsState(false)
 
     TabNavigator(
         navOptions = listOf(
@@ -40,7 +41,7 @@ fun AdminNavigationScreen() {
             ),
             TabNavOption(
                 name = "Find patient",
-                route = "/find_patient"
+                route = "/find_patient/{forResult}"
             ),
             TabNavOption(
                 name = "Appointments",
@@ -49,10 +50,6 @@ fun AdminNavigationScreen() {
             TabNavOption(
                 name = "Hospitalizations",
                 route = "/hospitalizations"
-            ),
-            TabNavOption(
-                name = "Payments",
-                route = "/payments"
             ),
             TabNavOption(
                 name = "Drugs",
@@ -71,18 +68,11 @@ fun AdminNavigationScreen() {
                 route = "/statistics"
             ),
         ),
-        onNavigate = { route ->
-            navigator.navigate(route)
-        },
-        onNavigateBack = {
-            navigator.goBack()
-        },
-        canGoBack = canGoBack,
         isLoading = isLoading
-    ) {
+    ) { navController ->
         NavHost(
             modifier = Modifier.fillMaxSize(),
-            navigator = navigator,
+            navigator = navController.navigator,
             initialRoute = "/registration_worker"
         ) {
             scene(route = "/registration_worker") {
@@ -113,7 +103,7 @@ fun AdminNavigationScreen() {
                 })
 
                 FindDoctorScreen(
-                    navigator = navigator,
+                    navController = navController,
                     uiState = uiState.value,
                     onUiEvent = { event ->
                         viewModel.onUiEvent(event)
@@ -133,7 +123,7 @@ fun AdminNavigationScreen() {
                         TaskResult.NotCompleted -> Unit
                         TaskResult.Failure -> Unit
                         is TaskResult.Success<*> -> {
-                            navigator.navigate("/info/patient/${(uiState.value.registrationResult as TaskResult.Success<*>).data as Int}")
+                            navController.navigate("/info/patient/${(uiState.value.registrationResult as TaskResult.Success<*>).data as Int}")
                             viewModel.onUiEvent(ClientRegistrationUiEvent.ForgetRegistration)
                         }
                     }
@@ -146,7 +136,7 @@ fun AdminNavigationScreen() {
                     }
                 )
             }
-            scene(route = "/find_patient") {
+            scene(route = "/find_patient/{forResult}") {
                 val viewModel = koinViewModel<FindClientViewModel>()
                 val uiState = viewModel.uiState.collectAsState()
 
@@ -159,20 +149,37 @@ fun AdminNavigationScreen() {
                 })
 
                 FindClientScreen(
-                    navigator = navigator,
+                    navController = navController,
                     uiState = uiState.value,
                     onUiEvent = { event ->
                         viewModel.onUiEvent(event)
-                    }
+                    },
+                    forResult = false
                 )
             }
             scene(route = "/appointments") {
+                val viewModel = koinViewModel<AppointmentsViewModel>()
+                val uiState = viewModel.uiState.collectAsState()
 
+                LaunchedEffect(key1 = uiState.value.isLoading, block = {
+                    isLoading = uiState.value.isLoading
+                })
+
+                LaunchedEffect(key1 = true, block = {
+                    viewModel.onUiEvent(AppointmentsUiEvent.FetchAppointmentsForAdmin)
+                })
+
+                AppointmentsScreen(
+                    navController = navController,
+                    uiState = uiState.value,
+                    onUiEvent = { event ->
+                        viewModel.onUiEvent(event)
+                    },
+                    userDoctorId = null,
+                    appArgs = AppArgs.ADMIN
+                )
             }
             scene(route = "/hospitalizations") {
-
-            }
-            scene(route = "/payments") {
 
             }
             scene(route = "/drugs") {
@@ -206,7 +213,7 @@ fun AdminNavigationScreen() {
                         viewModel.onUiEvent(event)
                     },
                     userClientId = userClientId,
-                    isRemote = true
+                    canEdit = true
                 )
             }
             scene(route = "/info/worker/{userDoctorId}") { navBackStackEntry ->
@@ -228,6 +235,7 @@ fun AdminNavigationScreen() {
                         viewModel.onUiEvent(event)
                     },
                     userDoctorId = userDoctorId,
+                    canEdit = true,
                     isRemote = true
                 )
             }

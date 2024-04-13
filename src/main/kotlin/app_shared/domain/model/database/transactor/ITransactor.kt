@@ -1,4 +1,4 @@
-package app_shared.domain.model.transactor
+package app_shared.domain.model.database.transactor
 
 import java.sql.*
 

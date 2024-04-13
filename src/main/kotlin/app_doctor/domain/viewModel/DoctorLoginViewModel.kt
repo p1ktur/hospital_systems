@@ -3,7 +3,7 @@ package app_doctor.domain.viewModel
 import app_doctor.data.*
 import app_shared.domain.model.exceptions.*
 import app_shared.domain.model.login.*
-import app_shared.domain.model.transactor.*
+import app_shared.domain.model.database.transactor.*
 import app_shared.domain.uiEvent.*
 import app_shared.domain.uiState.*
 import kotlinx.coroutines.*
@@ -17,7 +17,8 @@ class DoctorLoginViewModel(private val doctorLoginRepository: DoctorLoginReposit
 
     fun onUiEvent(event: LoginUiEvent) {
         when (event) {
-            LoginUiEvent.Login -> login()
+            LoginUiEvent.LogIn -> login()
+            LoginUiEvent.LogOut -> logout()
 
             is LoginUiEvent.UpdateLogin -> updateLogin(event.login)
             is LoginUiEvent.UpdatePassword -> updatePassword(event.password)
@@ -27,11 +28,11 @@ class DoctorLoginViewModel(private val doctorLoginRepository: DoctorLoginReposit
     private fun login() {
         if (uiState.value.isLoading) return
 
-        viewModelScope.launch {
-            _uiState.value = uiState.value.copy(
-                isLoading = true
-            )
+        _uiState.value = uiState.value.copy(
+            isLoading = true
+        )
 
+        viewModelScope.launch(Dispatchers.IO) {
             val errorCodes = mutableListOf<Int>()
 
             if (uiState.value.login.isEmpty()) {
@@ -84,6 +85,12 @@ class DoctorLoginViewModel(private val doctorLoginRepository: DoctorLoginReposit
                 )
             }
         }
+    }
+
+    private fun logout() {
+        if (uiState.value.isLoading) return
+
+        _uiState.value = LoginUiState()
     }
 
     private fun updatePassword(password: String) = _uiState.update { it.copy(password = password) }

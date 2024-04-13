@@ -11,14 +11,15 @@ import androidx.compose.ui.unit.*
 import app_client.domain.model.*
 import app_client.domain.uiEvent.*
 import app_client.domain.uiState.*
-import app_shared.presentation.components.*
-import moe.tlaster.precompose.navigation.*
+import app_shared.domain.model.tabNavigator.*
+import app_shared.presentation.components.common.*
 
 @Composable
 fun FindClientScreen(
-    navigator: Navigator,
+    navController: NavController,
     uiState: FindClientUiState,
-    onUiEvent: (FindClientUiEvent) -> Unit
+    onUiEvent: (FindClientUiEvent) -> Unit,
+    forResult: Boolean
 ) {
     var sort by remember {
         mutableStateOf(FindClientSort.NAME)
@@ -38,7 +39,7 @@ fun FindClientScreen(
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             modifier = Modifier.fillMaxWidth(),
-            text = "Find patient",
+            text = if (forResult) "Create appointment with... " else "Find patient",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center
@@ -101,7 +102,11 @@ fun FindClientScreen(
                         .height(48.dp)
                         .clickable(
                             onClick = {
-                                navigator.navigate("/info/patient/${data.userClientId}")
+                                if (forResult) {
+                                    navController.goBackWith(data.userClientId)
+                                } else {
+                                    navController.navigate("/info/patient/${data.userClientId}")
+                                }
                             }
                         ),
                     verticalAlignment = Alignment.Bottom,

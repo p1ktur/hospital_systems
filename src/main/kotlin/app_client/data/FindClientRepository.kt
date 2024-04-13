@@ -1,7 +1,7 @@
 package app_client.data
 
 import app_client.domain.model.*
-import app_shared.domain.model.transactor.*
+import app_shared.domain.model.database.transactor.*
 
 class FindClientRepository(private val transactor: ITransactor) {
 

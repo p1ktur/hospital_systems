@@ -1,6 +1,7 @@
 package app_shared.data
 
-import app_shared.domain.model.transactor.*
+import app_shared.domain.model.database.dbModels.*
+import app_shared.domain.model.database.transactor.*
 import app_shared.domain.model.vocabulary.*
 import com.opencsv.*
 import kotlin.random.*

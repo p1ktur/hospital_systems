@@ -1,4 +1,4 @@
-package app_shared.presentation.components
+package app_shared.presentation.components.common
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.*

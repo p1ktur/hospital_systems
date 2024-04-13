@@ -4,7 +4,7 @@ import app_doctor.data.*
 import app_doctor.domain.model.*
 import app_doctor.domain.uiEvent.*
 import app_doctor.domain.uiState.*
-import app_shared.domain.model.transactor.*
+import app_shared.domain.model.database.transactor.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import moe.tlaster.precompose.viewmodel.*
@@ -157,7 +157,7 @@ class DoctorInfoViewModel(
                 _uiState.value = uiState.value.copy(
                     editMode = false,
                     isLoading = false,
-                    errorCodes = listOf(1001)
+                    errorCodes = listOf(1003)
                 )
             }
         }

@@ -9,26 +9,33 @@ import app_client.presentation.screens.*
 import app_doctor.domain.uiEvent.*
 import app_doctor.domain.viewModel.*
 import app_doctor.presentation.screens.*
+import app_shared.domain.model.args.*
 import app_shared.domain.model.login.*
 import app_shared.domain.model.result.*
 import app_shared.domain.model.tabNavigator.*
-import app_shared.presentation.components.*
+import app_shared.domain.uiEvent.*
+import app_shared.domain.viewModel.*
+import app_shared.presentation.components.common.*
 import app_shared.presentation.screens.*
 import moe.tlaster.precompose.koin.*
 import moe.tlaster.precompose.navigation.*
 
 @Composable
 fun DoctorNavigationScreen() {
-    val navigator = rememberNavigator()
-
     var isLoading by remember { mutableStateOf(false) }
-    val canGoBack by navigator.canGoBack.collectAsState(false)
 
     var loginStatus by remember { mutableStateOf<LoginStatus>(LoginStatus.LoggedOut) }
+    var onLogOut by remember { mutableStateOf<(() -> Unit)?>(null) }
 
     if (loginStatus is LoginStatus.LoggedOut) {
         val viewModel = koinViewModel<DoctorLoginViewModel>()
         val uiState = viewModel.uiState.collectAsState()
+
+        LaunchedEffect(key1 = true, block = {
+            onLogOut = {
+                viewModel.onUiEvent(LoginUiEvent.LogOut)
+            }
+        })
 
         LaunchedEffect(key1 = uiState.value.isLoading, block = {
             isLoading = uiState.value.isLoading
@@ -48,7 +55,7 @@ fun DoctorNavigationScreen() {
         navOptions = listOf(
             TabNavOption(
                 name = "Info",
-                route = "/info/${(loginStatus as? LoginStatus.LoggedIn)?.userId}"
+                route = "/info/worker/${(loginStatus as? LoginStatus.LoggedIn)?.userId}"
             ),
             TabNavOption(
                 name = "Appointments",
@@ -64,24 +71,21 @@ fun DoctorNavigationScreen() {
             ),
             TabNavOption(
                 name = "Find patient",
-                route = "/find_patient"
+                route = "/find_patient/false"
             ),
         ),
-        onNavigate = { route ->
-            navigator.navigate(route)
-        },
-        onNavigateBack = {
-            navigator.goBack()
-        },
-        canGoBack = canGoBack,
-        isLoading = isLoading
-    ) {
+        isLoading = isLoading,
+        onLogOut = {
+            loginStatus = LoginStatus.LoggedOut
+            onLogOut?.invoke()
+        }
+    ) { navController ->
         NavHost(
             modifier = Modifier.fillMaxSize(),
-            navigator = navigator,
-            initialRoute = "/info/${(loginStatus as? LoginStatus.LoggedIn)?.userId}"
+            navigator = navController.navigator,
+            initialRoute = "/info/worker/${(loginStatus as? LoginStatus.LoggedIn)?.userId}"
         ) {
-            scene(route = "/info/{userDoctorId}") { navBackStackEntry ->
+            scene(route = "/info/worker/{userDoctorId}") { navBackStackEntry ->
                 val userDoctorId = navBackStackEntry.path<Int>("userDoctorId") ?: -1
                 val viewModel = koinViewModel<DoctorInfoViewModel>()
                 val uiState = viewModel.uiState.collectAsState()
@@ -100,11 +104,32 @@ fun DoctorNavigationScreen() {
                         viewModel.onUiEvent(event)
                     },
                     userDoctorId = userDoctorId,
+                    canEdit = false,
                     isRemote = false
                 )
             }
-            scene(route = "/appointments/{userDoctorId}") {
+            scene(route = "/appointments/{userDoctorId}") { navBackStackEntry ->
+                val userDoctorId = navBackStackEntry.path<Int>("userDoctorId") ?: -1
+                val viewModel = koinViewModel<AppointmentsViewModel>()
+                val uiState = viewModel.uiState.collectAsState()
 
+                LaunchedEffect(key1 = uiState.value.isLoading, block = {
+                    isLoading = uiState.value.isLoading
+                })
+
+                LaunchedEffect(key1 = true, block = {
+                    viewModel.onUiEvent(AppointmentsUiEvent.FetchAppointmentsForDoctor(userDoctorId))
+                })
+
+                AppointmentsScreen(
+                    navController = navController,
+                    uiState = uiState.value,
+                    onUiEvent = { event ->
+                        viewModel.onUiEvent(event)
+                    },
+                    userDoctorId = userDoctorId,
+                    appArgs = AppArgs.DOCTOR
+                )
             }
             scene(route = "/schedule/{userDoctorId}") { navBackStackEntry ->
                 val userDoctorId = navBackStackEntry.path<Int>("userDoctorId") ?: -1
@@ -136,7 +161,7 @@ fun DoctorNavigationScreen() {
                         TaskResult.NotCompleted -> Unit
                         TaskResult.Failure -> Unit
                         is TaskResult.Success<*> -> {
-                            navigator.navigate("/info/patient/${(uiState.value.registrationResult as TaskResult.Success<*>).data as Int}")
+                            navController.navigate("/info/patient/${(uiState.value.registrationResult as TaskResult.Success<*>).data as Int}")
                             viewModel.onUiEvent(ClientRegistrationUiEvent.ForgetRegistration)
                         }
                     }
@@ -149,7 +174,8 @@ fun DoctorNavigationScreen() {
                     }
                 )
             }
-            scene(route = "/find_patient") {
+            scene(route = "/find_patient/{forResult}") { navBackStackEntry ->
+                val forResult = navBackStackEntry.path<Boolean>("forResult") ?: false
                 val viewModel = koinViewModel<FindClientViewModel>()
                 val uiState = viewModel.uiState.collectAsState()
 
@@ -162,11 +188,12 @@ fun DoctorNavigationScreen() {
                 })
 
                 FindClientScreen(
-                    navigator = navigator,
+                    navController = navController,
                     uiState = uiState.value,
                     onUiEvent = { event ->
                         viewModel.onUiEvent(event)
-                    }
+                    },
+                    forResult = forResult
                 )
             }
             scene(route = "/info/patient/{userClientId}") { navBackStackEntry ->
@@ -188,7 +215,7 @@ fun DoctorNavigationScreen() {
                         viewModel.onUiEvent(event)
                     },
                     userClientId = userClientId,
-                    isRemote = true
+                    canEdit = true
                 )
             }
         }

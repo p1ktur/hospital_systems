@@ -1,7 +1,8 @@
-package app_shared.presentation.components
+package app_shared.presentation.components.common
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.*
 import androidx.compose.foundation.text.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.*
@@ -13,7 +14,6 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.*
 import app_shared.domain.model.regex.*
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DefaultTextField(
     modifier: Modifier = Modifier,
@@ -21,7 +21,10 @@ fun DefaultTextField(
     label: String,
     onValueChange: (String) -> Unit,
     showEditIcon: Boolean = true,
+    multiLine: Boolean = false,
     onlyNumbers: Boolean = false,
+    onlyIntegerNumbers: Boolean = false,
+    maxLength: Int = 72,
     isError: Boolean = false
 ) {
     var text by remember {
@@ -29,8 +32,7 @@ fun DefaultTextField(
     }
 
     Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
+        modifier = modifier
     ) {
         androidx.compose.material3.Text(
             text = label,
@@ -50,12 +52,19 @@ fun DefaultTextField(
         BasicTextField(
             value = text,
             onValueChange = { newValue ->
-                if (newValue.length <= 72) {
-                    text = if (!onlyNumbers) newValue else newValue.filter { it.isDigit() }
+                if (newValue.length <= maxLength) {
+                    text = if (!onlyNumbers && !onlyIntegerNumbers) {
+                        newValue
+                    } else if (!onlyIntegerNumbers) {
+                        val tempValue = newValue.filter { it.isDigit() || it == '.' }
+                        if (tempValue.count { it == '.' } > 1) text else tempValue
+                    } else {
+                        newValue.filter { it.isDigit() }
+                    }
                     onValueChange(text)
                 }
             },
-            singleLine = true,
+            singleLine = !multiLine,
             textStyle = MaterialTheme.typography.bodyLarge.copy(
                 color = if (!isError) {
                     MaterialTheme.colorScheme.onBackground
@@ -75,6 +84,7 @@ fun OptionsTextField(
     startValue: String,
     label: String,
     showEditIcon: Boolean = true,
+    decorated: Boolean = false,
     options: List<String> = emptyList(),
     onOptionSelected: (Int) -> Unit,
     isError: Boolean = false
@@ -86,6 +96,10 @@ fun OptionsTextField(
     var isMenuExpanded by remember {
         mutableStateOf(false)
     }
+
+    LaunchedEffect(key1 = options, block = {
+        if (!options.contains(text)) text = options.firstOrNull().toString()
+    })
 
     if (options.isEmpty()) {
         Row(
@@ -107,18 +121,10 @@ fun OptionsTextField(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
             }
-            BasicTextField(
-                value = "No options",
-                onValueChange = { },
-                singleLine = true,
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                    color = if (!isError) {
-                        MaterialTheme.colorScheme.onBackground
-                    } else {
-                        MaterialTheme.colorScheme.error
-                    },
-                ),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground)
+            androidx.compose.material3.Text(
+                text = "No options",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
     } else {
@@ -149,10 +155,23 @@ fun OptionsTextField(
                     Spacer(modifier = Modifier.width(4.dp))
                 }
                 Text(
+                    modifier = if (decorated) {
+                        Modifier
+                            .weight(1f)
+                            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(5))
+                            .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(5))
+                            .padding(4.dp)
+                    } else {
+                        Modifier
+                    },
                     text = text,
                     style = MaterialTheme.typography.bodyLarge.copy(
                         color = if (!isError) {
-                            MaterialTheme.colorScheme.onBackground
+                            if (decorated) {
+                                MaterialTheme.colorScheme.onBackground
+                            } else {
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            }
                         } else {
                             MaterialTheme.colorScheme.error
                         },

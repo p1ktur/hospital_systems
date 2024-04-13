@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.*
 import app_shared.domain.uiEvent.*
 import app_shared.domain.uiState.*
 import app_shared.presentation.codes.*
-import app_shared.presentation.components.*
+import app_shared.presentation.components.common.*
 import app_shared.presentation.theme.*
 
 @Composable
@@ -24,7 +24,7 @@ fun LoginScreen(
             .padding(horizontal = 32.dp)
             .verticalScroll(rememberScrollState())
             .onKeyEvent { keyEvent ->
-                if (keyEvent.key == Key.Enter) onUiEvent(LoginUiEvent.Login)
+                if (keyEvent.key == Key.Enter) onUiEvent(LoginUiEvent.LogIn)
                 false
             },
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -65,7 +65,7 @@ fun LoginScreen(
         Button(
             modifier = Modifier.width(160.dp),
             onClick = {
-                onUiEvent(LoginUiEvent.Login)
+                onUiEvent(LoginUiEvent.LogIn)
             },
             colors = buttonColors()
         ) {

@@ -13,15 +13,15 @@ import app_doctor.domain.uiEvent.*
 import app_doctor.domain.uiState.*
 import app_shared.domain.model.numbers.*
 import app_shared.presentation.codes.*
-import app_shared.presentation.components.*
+import app_shared.presentation.components.common.*
 import app_shared.presentation.theme.*
-import moe.tlaster.precompose.navigation.*
 
 @Composable
 fun DoctorInfoScreen(
     uiState: DoctorInfoUiState,
     onUiEvent: (DoctorInfoUiEvent) -> Unit,
     userDoctorId: Int,
+    canEdit: Boolean,
     isRemote: Boolean
 ) {
     var saveChangesAllowed by remember {
@@ -42,7 +42,7 @@ fun DoctorInfoScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = if (!isRemote) "Your work information" else "${uiState.name}\'s work information",
+                text = if (!canEdit && !isRemote) "Your work information" else "${uiState.name}\'s work information",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center
@@ -153,7 +153,7 @@ fun DoctorInfoScreen(
                     startValue = uiState.age,
                     label = "Age:",
                     onValueChange = { onUiEvent(DoctorInfoUiEvent.UpdateAge(it)) },
-                    onlyNumbers = true
+                    onlyIntegerNumbers = true
                 )
             } else {
                 Text(
@@ -258,7 +258,7 @@ fun DoctorInfoScreen(
             }
             Spacer(modifier = Modifier.height(32.dp))
             //----
-            if (isRemote) {
+            if (canEdit) {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     text = "Your schedule",
@@ -386,7 +386,7 @@ fun DoctorInfoScreen(
                 Spacer(modifier = Modifier.height(32.dp))
             }
         }
-        if (isRemote) {
+        if (canEdit) {
             Icon(
                 modifier = Modifier
                     .size(56.dp)

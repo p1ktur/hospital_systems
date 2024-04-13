@@ -1,12 +1,12 @@
 package app_doctor.data
 
 import app_doctor.domain.model.*
-import app_shared.domain.model.transactor.*
+import app_shared.domain.model.database.dbModels.*
+import app_shared.domain.model.database.transactor.*
 
 class DoctorInfoRepository(private val transactor: ITransactor) {
 
     fun fetchInfo(userWorkerId: Int): TransactorResult = transactor.startTransaction {
-        println(userWorkerId)
         val userWorkerStatement = createStatement()
         val userWorkerResult = userWorkerStatement.executeQuery("SELECT user_id, worker_id FROM user_doctor WHERE id = $userWorkerId")
         userWorkerResult.next()

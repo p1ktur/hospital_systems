@@ -15,8 +15,8 @@ import app_shared.data.*
 import app_shared.di.*
 import app_shared.domain.model.args.*
 import app_shared.domain.model.theme.*
-import app_shared.domain.model.transactor.*
-import app_shared.presentation.components.*
+import app_shared.domain.model.database.transactor.*
+import app_shared.presentation.components.window.*
 import app_shared.presentation.theme.*
 import com.hospital.systems.hospitalsystems.generated.resources.*
 import kotlinx.coroutines.*

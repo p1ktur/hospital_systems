@@ -1,6 +1,6 @@
 package app_doctor.domain.model
 
-import app_shared.domain.model.transactor.*
+import app_shared.domain.model.database.dbModels.*
 
 data class DoctorInfoData(
     val name: String = "",

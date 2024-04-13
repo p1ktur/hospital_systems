@@ -1,4 +1,4 @@
-package app_shared.domain.model.transactor
+package app_shared.domain.model.database.dbModels
 
 data class Room(
     val id: Int,

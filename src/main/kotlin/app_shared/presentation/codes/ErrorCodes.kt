@@ -4,6 +4,7 @@ fun parseDefaultErrorCode(code: Int): String {
     return when (code) {
         1001 -> "Couldn't load resource."
         1002 -> "Specify schedule fully."
+        1003 -> "Couldn't upload resource."
         else -> "Unknown error."
     }
 }

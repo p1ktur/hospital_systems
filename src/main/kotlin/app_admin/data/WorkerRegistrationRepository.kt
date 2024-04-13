@@ -1,7 +1,7 @@
 package app_admin.data
 
 import app_shared.domain.model.exceptions.*
-import app_shared.domain.model.transactor.*
+import app_shared.domain.model.database.transactor.*
 
 class WorkerRegistrationRepository(private val transactor: ITransactor) {
 

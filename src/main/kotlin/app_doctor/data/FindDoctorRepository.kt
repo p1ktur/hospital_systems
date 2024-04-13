@@ -1,7 +1,7 @@
 package app_doctor.data
 
 import app_doctor.domain.model.*
-import app_shared.domain.model.transactor.*
+import app_shared.domain.model.database.transactor.*
 
 class FindDoctorRepository(private val transactor: ITransactor) {
 

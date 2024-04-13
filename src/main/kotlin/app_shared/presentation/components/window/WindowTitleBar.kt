@@ -1,4 +1,4 @@
-package app_shared.presentation.components
+package app_shared.presentation.components.window
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*

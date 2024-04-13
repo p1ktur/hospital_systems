@@ -1,7 +1,7 @@
 package app_doctor.data
 
 import app_shared.domain.model.exceptions.*
-import app_shared.domain.model.transactor.*
+import app_shared.domain.model.database.transactor.*
 
 class DoctorLoginRepository(private val transactor: ITransactor) {
 

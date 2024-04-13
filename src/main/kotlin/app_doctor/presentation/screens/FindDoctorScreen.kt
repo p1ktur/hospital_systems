@@ -11,12 +11,12 @@ import androidx.compose.ui.unit.*
 import app_doctor.domain.model.*
 import app_doctor.domain.uiEvent.*
 import app_doctor.domain.uiState.*
-import app_shared.presentation.components.*
-import moe.tlaster.precompose.navigation.*
+import app_shared.domain.model.tabNavigator.*
+import app_shared.presentation.components.common.*
 
 @Composable
 fun FindDoctorScreen(
-    navigator: Navigator,
+    navController: NavController,
     uiState: FindDoctorUiState,
     onUiEvent: (FindDoctorUiEvent) -> Unit
 ) {
@@ -131,7 +131,7 @@ fun FindDoctorScreen(
                         .height(48.dp)
                         .clickable(
                             onClick = {
-                                navigator.navigate("/info/worker/${data.userWorkerId}")
+                                navController.navigate("/info/worker/${data.userWorkerId}")
                             }
                         ),
                     verticalAlignment = Alignment.Bottom,

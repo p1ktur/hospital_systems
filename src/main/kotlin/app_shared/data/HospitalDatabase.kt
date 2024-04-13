@@ -1,7 +1,7 @@
 package app_shared.data
 
 import app_shared.domain.model.args.*
-import app_shared.domain.model.transactor.*
+import app_shared.domain.model.database.transactor.*
 import java.sql.*
 
 class HospitalDatabase : AutoCloseable, ITransactor {

@@ -4,7 +4,7 @@ import app_doctor.data.*
 import app_doctor.domain.model.*
 import app_doctor.domain.uiEvent.*
 import app_doctor.domain.uiState.*
-import app_shared.domain.model.transactor.*
+import app_shared.domain.model.database.transactor.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import moe.tlaster.precompose.viewmodel.*

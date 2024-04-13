@@ -4,7 +4,7 @@ import app_client.data.*
 import app_client.domain.model.*
 import app_client.domain.uiEvent.*
 import app_client.domain.uiState.*
-import app_shared.domain.model.transactor.*
+import app_shared.domain.model.database.transactor.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import moe.tlaster.precompose.viewmodel.*
@@ -89,7 +89,7 @@ class ClientInfoViewModel(private val clientInfoRepository: ClientInfoRepository
                     _uiState.value = uiState.value.copy(
                         editMode = false,
                         isLoading = false,
-                        errorCodes = listOf(1001)
+                        errorCodes = listOf(1003)
                     )
                 }
                 is TransactorResult.Success<*> -> {

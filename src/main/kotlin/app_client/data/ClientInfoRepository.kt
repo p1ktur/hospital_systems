@@ -1,7 +1,8 @@
 package app_client.data
 
 import app_client.domain.model.*
-import app_shared.domain.model.transactor.*
+import app_shared.domain.model.database.*
+import app_shared.domain.model.database.transactor.*
 import java.time.format.*
 
 class ClientInfoRepository(private val transactor: ITransactor) {
@@ -16,7 +17,7 @@ class ClientInfoRepository(private val transactor: ITransactor) {
         val medCardResult = medCardStatement.executeQuery()
         medCardResult.next()
 
-        val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss")
+        val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm")
         val registrationDate = medCardResult.getTimestamp(1).toLocalDateTime().format(formatter)
 
         val isHospitalized = medCardResult.getIntOrNull(2).run { this != null }

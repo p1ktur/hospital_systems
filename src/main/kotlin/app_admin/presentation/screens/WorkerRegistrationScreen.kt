@@ -9,9 +9,8 @@ import androidx.compose.ui.unit.*
 import app_admin.domain.uiEvent.*
 import app_admin.domain.uiState.*
 import app_shared.presentation.codes.*
-import app_shared.presentation.components.*
+import app_shared.presentation.components.common.*
 import app_shared.presentation.theme.*
-import moe.tlaster.precompose.navigation.*
 
 @Composable
 fun WorkerRegistrationScreen(

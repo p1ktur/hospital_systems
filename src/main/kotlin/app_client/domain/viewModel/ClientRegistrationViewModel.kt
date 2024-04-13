@@ -6,7 +6,7 @@ import app_client.domain.uiState.*
 import app_shared.domain.model.exceptions.*
 import app_shared.domain.model.regex.*
 import app_shared.domain.model.result.*
-import app_shared.domain.model.transactor.*
+import app_shared.domain.model.database.transactor.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import moe.tlaster.precompose.viewmodel.*
