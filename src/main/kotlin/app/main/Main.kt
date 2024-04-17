@@ -5,7 +5,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.*
-import app_admin.di.*
 import app.data.core.*
 import app.di.*
 import app.domain.database.transactor.*

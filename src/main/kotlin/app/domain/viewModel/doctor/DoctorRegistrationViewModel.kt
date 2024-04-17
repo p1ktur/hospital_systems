@@ -1,6 +1,6 @@
 package app.domain.viewModel.doctor
 
-import app_admin.data.*
+import app.data.doctor.*
 import app.domain.database.transactor.*
 import app.domain.uiEvent.doctor.*
 import app.domain.uiState.doctor.*
@@ -11,7 +11,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import moe.tlaster.precompose.viewmodel.*
 
-class DoctorRegistrationViewModel(private val workerRegistrationRepository: WorkerRegistrationRepository) : ViewModel() {
+class DoctorRegistrationViewModel(private val doctorLoginRegistrationRepository: DoctorLoginRegistrationRepository) : ViewModel() {
 
     private val _uiState: MutableStateFlow<DoctorRegistrationUiState> = MutableStateFlow(DoctorRegistrationUiState())
     val uiState = _uiState.asStateFlow()
@@ -114,7 +114,7 @@ class DoctorRegistrationViewModel(private val workerRegistrationRepository: Work
                     errorCodes = errorCodes
                 )
 
-                val registerResult = workerRegistrationRepository.register(
+                val registerResult = doctorLoginRegistrationRepository.register(
                     name = uiState.value.name,
                     surname = uiState.value.surname,
                     fathersName = uiState.value.fathersName,

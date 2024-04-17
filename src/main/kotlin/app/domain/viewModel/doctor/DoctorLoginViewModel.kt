@@ -10,7 +10,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import moe.tlaster.precompose.viewmodel.*
 
-class DoctorLoginViewModel(private val doctorLoginRepository: DoctorLoginRepository) : ViewModel() {
+class DoctorLoginViewModel(private val doctorLoginRegistrationRepository: DoctorLoginRegistrationRepository) : ViewModel() {
 
     private val _uiState: MutableStateFlow<LoginUiState> = MutableStateFlow(LoginUiState())
     val uiState = _uiState.asStateFlow()
@@ -53,7 +53,7 @@ class DoctorLoginViewModel(private val doctorLoginRepository: DoctorLoginReposit
                     errorCodes = errorCodes
                 )
 
-                val loginResult = doctorLoginRepository.login(
+                val loginResult = doctorLoginRegistrationRepository.login(
                     login = uiState.value.login,
                     password = uiState.value.password,
                 )
