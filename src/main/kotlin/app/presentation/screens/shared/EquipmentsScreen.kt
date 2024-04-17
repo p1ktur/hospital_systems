@@ -10,14 +10,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.text.style.*
 import androidx.compose.ui.unit.*
-import app.domain.model.shared.drug.*
 import app.domain.model.shared.equipment.*
-import app.domain.model.shared.room.*
 import app.domain.tabNavigator.*
 import app.domain.uiEvent.shared.*
 import app.domain.uiState.shared.*
 import app.domain.util.editing.*
-import app.domain.util.numbers.*
 import app.presentation.codes.*
 import app.presentation.components.common.*
 import kotlinx.coroutines.*

@@ -2,8 +2,6 @@ package app.data.shared
 
 import app.domain.database.transactor.*
 import app.domain.model.shared.drug.*
-import app.domain.model.shared.room.*
-import app.domain.util.exceptions.*
 
 class DrugsRepository(private val transactor: ITransactor) {
 

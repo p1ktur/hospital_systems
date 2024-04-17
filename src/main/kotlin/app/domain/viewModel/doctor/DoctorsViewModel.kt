@@ -3,7 +3,6 @@ package app.domain.viewModel.doctor
 import app.data.doctor.*
 import app.domain.database.transactor.*
 import app.domain.model.doctor.*
-import app.domain.model.shared.equipment.*
 import app.domain.uiEvent.doctor.*
 import app.domain.uiState.doctor.*
 import kotlinx.coroutines.*

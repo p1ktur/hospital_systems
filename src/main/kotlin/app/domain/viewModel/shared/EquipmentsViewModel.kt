@@ -2,7 +2,6 @@ package app.domain.viewModel.shared
 
 import app.data.shared.*
 import app.domain.database.transactor.*
-import app.domain.model.shared.drug.*
 import app.domain.model.shared.equipment.*
 import app.domain.uiEvent.shared.*
 import app.domain.uiState.shared.*

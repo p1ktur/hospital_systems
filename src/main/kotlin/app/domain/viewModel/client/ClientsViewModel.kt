@@ -3,7 +3,6 @@ package app.domain.viewModel.client
 import app.data.client.*
 import app.domain.database.transactor.*
 import app.domain.model.client.*
-import app.domain.model.doctor.*
 import app.domain.uiEvent.client.*
 import app.domain.uiState.client.*
 import kotlinx.coroutines.*

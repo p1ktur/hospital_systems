@@ -1,10 +1,8 @@
 package app.data.shared
 
 import app.domain.database.transactor.*
-import app.domain.model.shared.drug.*
 import app.domain.model.shared.equipment.*
 import app.domain.model.shared.room.*
-import app.domain.util.exceptions.*
 
 class EquipmentsRepository(
     private val transactor: ITransactor,
