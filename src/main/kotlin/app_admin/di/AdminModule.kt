@@ -1,11 +1,11 @@
 package app_admin.di
 
+import app.domain.viewModel.doctor.*
 import app_admin.data.*
-import app_admin.domain.viewModel.*
 import org.koin.dsl.*
 
 val adminModule = module {
     single { WorkerRegistrationRepository(get()) }
 
-    factory { WorkerRegistrationViewModel(get()) }
+    factory { DoctorRegistrationViewModel(get()) }
 }
