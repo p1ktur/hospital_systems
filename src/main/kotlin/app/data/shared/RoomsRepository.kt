@@ -47,6 +47,24 @@ class RoomsRepository(private val transactor: ITransactor) {
         TransactorResult.Success(roomSearchDataList.sortedBy { it.name })
     }
 
+    fun getById(id: Int): TransactorResult = transactor.startTransaction {
+        val getStatement = prepareStatement("SELECT room.id, room.name, floor, number FROM room " +
+                "INNER JOIN room_location ON room.location_id = room_location.id " +
+                "WHERE room.id = ?")
+        getStatement.setInt(1, id)
+        val getResult = getStatement.executeQuery()
+        getResult.next()
+
+        val room = Room(
+            id = getResult.getInt(1),
+            name = getResult.getString(2),
+            floor = getResult.getInt(3),
+            number = getResult.getInt(4)
+        )
+
+        TransactorResult.Success(room)
+    }
+
     fun create(room: RoomSearchData): TransactorResult = transactor.startTransaction {
         val typeIdStatement = prepareStatement("SELECT id FROM room_type WHERE name = ?")
         typeIdStatement.setString(1, room.type)

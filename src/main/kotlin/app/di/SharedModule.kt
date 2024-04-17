@@ -21,8 +21,12 @@ val sharedModule = module {
     single { AppointmentsRepository(get()) }
     single { HospitalizationsRepository(get()) }
     single { RoomsRepository(get()) }
+    single { DrugsRepository(get()) }
+    single { EquipmentsRepository(get(), get()) }
 
     factory { AppointmentsViewModel(get()) }
     factory { HospitalizationsViewModel(get()) }
     factory { RoomsViewModel(get()) }
+    factory { DrugsViewModel(get()) }
+    factory { EquipmentsViewModel(get()) }
 }

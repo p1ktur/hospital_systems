@@ -1,7 +1,7 @@
 package app.data.core
 
 import app.domain.database.transactor.*
-import app.domain.model.shared.*
+import app.domain.model.shared.drug.*
 import app.domain.util.vocabulary.*
 import com.opencsv.*
 import kotlin.random.*

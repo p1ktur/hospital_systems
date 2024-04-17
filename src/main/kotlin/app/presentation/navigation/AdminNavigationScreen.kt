@@ -26,14 +26,6 @@ fun AdminNavigationScreen() {
     TabNavigator(
         navOptions = listOf(
             TabNavOption(
-                name = "Find worker",
-                route = "/find_worker"
-            ),
-            TabNavOption(
-                name = "Find patient",
-                route = "/find_patient/false"
-            ),
-            TabNavOption(
                 name = "Appointments",
                 route = "/appointments"
             ),
@@ -42,12 +34,20 @@ fun AdminNavigationScreen() {
                 route = "/hospitalizations"
             ),
             TabNavOption(
+                name = "Find worker",
+                route = "/find_worker"
+            ),
+            TabNavOption(
+                name = "Find patient",
+                route = "/find_patient/false"
+            ),
+            TabNavOption(
                 name = "Drugs",
                 route = "/drugs"
             ),
             TabNavOption(
                 name = "Rooms",
-                route = "/find_room/false"
+                route = "/find_room/false/true"
             ),
             TabNavOption(
                 name = "Equipment",
@@ -203,10 +203,29 @@ fun AdminNavigationScreen() {
                 )
             }
             scene(route = "/drugs") {
+                val viewModel = koinViewModel<DrugsViewModel>()
+                val uiState = viewModel.uiState.collectAsState()
 
+                LaunchedEffect(key1 = uiState.value.isLoading, block = {
+                    isLoading = uiState.value.isLoading
+                })
+
+                LaunchedEffect(key1 = true, block = {
+                    viewModel.onUiEvent(DrugsUiEvent.Search)
+                })
+
+                DrugsScreen(
+                    navController = navController,
+                    uiState = uiState.value,
+                    onUiEvent = { event ->
+                        viewModel.onUiEvent(event)
+                    },
+                    forResult = false
+                )
             }
-            scene(route = "/find_room/{forResult}") { navBackStackEntry ->
+            scene(route = "/find_room/{forResult}/{all}") { navBackStackEntry ->
                 val forResult = navBackStackEntry.path<Boolean>("forResult") ?: false
+                val all = navBackStackEntry.path<Boolean>("all") ?: true
                 val viewModel = koinViewModel<RoomsViewModel>()
                 val uiState = viewModel.uiState.collectAsState()
 
@@ -215,7 +234,7 @@ fun AdminNavigationScreen() {
                 })
 
                 LaunchedEffect(key1 = true, block = {
-                    viewModel.onUiEvent(RoomsUiEvent.Search(all = !forResult))
+                    viewModel.onUiEvent(RoomsUiEvent.Search(all = all))
                 })
 
                 RoomsScreen(
@@ -228,7 +247,25 @@ fun AdminNavigationScreen() {
                 )
             }
             scene(route = "/equipment") {
+                val viewModel = koinViewModel<EquipmentsViewModel>()
+                val uiState = viewModel.uiState.collectAsState()
 
+                LaunchedEffect(key1 = uiState.value.isLoading, block = {
+                    isLoading = uiState.value.isLoading
+                })
+
+                LaunchedEffect(key1 = true, block = {
+                    viewModel.onUiEvent(EquipmentsUiEvent.Search)
+                })
+
+                EquipmentsScreen(
+                    navController = navController,
+                    uiState = uiState.value,
+                    onUiEvent = { event ->
+                        viewModel.onUiEvent(event)
+                    },
+                    forResult = false
+                )
             }
             scene(route = "/statistics") {
 

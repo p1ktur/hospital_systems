@@ -1,8 +1,8 @@
 package app.data.shared
 
 import app.domain.database.transactor.*
-import app.domain.model.shared.*
 import app.domain.model.shared.hospitalization.*
+import app.domain.model.shared.payment.*
 import java.sql.*
 import java.time.format.*
 

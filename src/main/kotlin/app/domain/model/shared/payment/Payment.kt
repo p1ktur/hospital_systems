@@ -1,4 +1,4 @@
-package app.domain.model.shared
+package app.domain.model.shared.payment
 
 data class Payment(
     val id: Int,

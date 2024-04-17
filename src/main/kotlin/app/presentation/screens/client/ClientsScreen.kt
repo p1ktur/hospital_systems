@@ -51,7 +51,12 @@ fun ClientsScreen(
                 startValue = uiState.searchText,
                 onValueChange = { onUiEvent(ClientsUiEvent.UpdateSearchText(it)) }
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Search results: ${clientData.size}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -92,6 +97,13 @@ fun ClientsScreen(
                     textDecoration = if (uiState.sort == ClientsSort.AGE) TextDecoration.Underline else TextDecoration.None
                 )
             }
+            Divider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp),
+                color = MaterialTheme.colorScheme.onBackground,
+                thickness = 1.dp
+            )
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {

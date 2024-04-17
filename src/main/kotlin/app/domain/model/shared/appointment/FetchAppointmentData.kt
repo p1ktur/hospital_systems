@@ -1,6 +1,6 @@
 package app.domain.model.shared.appointment
 
-import app.domain.model.shared.*
+import app.domain.model.shared.payment.*
 
 data class FetchAppointmentData(
     val appointments: List<Appointment> = emptyList(),

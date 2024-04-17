@@ -53,7 +53,7 @@ fun HospitalizationsScreen(
         ) {
             Spacer(modifier = Modifier.height(32.dp))
             Text(
-                text = if (appArgs == AppArgs.ADMIN) "Your hospitalizations" else "Hospitalizations",
+                text = if (appArgs == AppArgs.CLIENT) "Your hospitalizations" else "Hospitalizations",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -131,7 +131,7 @@ fun HospitalizationsScreen(
                                     val userClientId = navController.navigateForResult("/find_patient/true") as Int?
 
                                     if (userClientId != null) {
-                                        val roomId = navController.navigateForResult("/find_room/true") as Int?
+                                        val roomId = navController.navigateForResult("/find_room/true/false") as Int?
 
                                         if (roomId != null) {
                                             onUiEvent(HospitalizationsUiEvent.StartCreatingHospitalization(userClientId, roomId))

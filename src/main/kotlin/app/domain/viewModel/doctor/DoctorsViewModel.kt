@@ -3,6 +3,7 @@ package app.domain.viewModel.doctor
 import app.data.doctor.*
 import app.domain.database.transactor.*
 import app.domain.model.doctor.*
+import app.domain.model.shared.equipment.*
 import app.domain.uiEvent.doctor.*
 import app.domain.uiState.doctor.*
 import kotlinx.coroutines.*
@@ -15,6 +16,7 @@ class DoctorsViewModel(private val doctorsRepository: DoctorsRepository) : ViewM
     val uiState = _uiState.asStateFlow()
 
     private var fetchedDoctorData: List<DoctorSearchData> = emptyList()
+    private var sortAscending = true
 
     fun onUiEvent(event: DoctorsUiEvent) {
         when (event) {
@@ -62,13 +64,31 @@ class DoctorsViewModel(private val doctorsRepository: DoctorsRepository) : ViewM
     }
 
     private fun sort(sort: DoctorsSort) {
+        if (uiState.value.isLoading) return
+
+        if (sort == uiState.value.sort) {
+            sortAscending = !sortAscending
+        } else {
+            _uiState.value = uiState.value.copy(
+                sort = sort
+            )
+        }
+
         _uiState.value = uiState.value.copy(
-            sort = sort,
-            doctorSearchData = when (sort) {
-                DoctorsSort.NAME -> uiState.value.doctorSearchData.sortedBy { it.name }
-                DoctorsSort.AGE -> uiState.value.doctorSearchData.sortedBy { it.age }
-                DoctorsSort.POSITION -> uiState.value.doctorSearchData.sortedBy { it.position }
-                DoctorsSort.SALARY -> uiState.value.doctorSearchData.sortedBy { it.salary }
+            doctorSearchData = if (sortAscending) {
+                when (sort) {
+                    DoctorsSort.NAME -> uiState.value.doctorSearchData.sortedBy { it.name }
+                    DoctorsSort.AGE -> uiState.value.doctorSearchData.sortedBy { it.age }
+                    DoctorsSort.POSITION -> uiState.value.doctorSearchData.sortedBy { it.position }
+                    DoctorsSort.SALARY -> uiState.value.doctorSearchData.sortedBy { it.salary }
+                }
+            } else {
+                when (sort) {
+                    DoctorsSort.NAME -> uiState.value.doctorSearchData.sortedByDescending { it.name }
+                    DoctorsSort.AGE -> uiState.value.doctorSearchData.sortedByDescending { it.age }
+                    DoctorsSort.POSITION -> uiState.value.doctorSearchData.sortedByDescending { it.position }
+                    DoctorsSort.SALARY -> uiState.value.doctorSearchData.sortedByDescending { it.salary }
+                }
             }
         )
     }

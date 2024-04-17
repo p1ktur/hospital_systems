@@ -6,8 +6,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
-import app.domain.model.shared.*
 import app.domain.model.shared.hospitalization.*
+import app.domain.model.shared.payment.*
 import app.domain.util.args.*
 
 @Composable
@@ -50,7 +50,7 @@ fun HospitalizationView(
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
-                        text = "Your appointment with ",
+                        text = "hospitalization",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )

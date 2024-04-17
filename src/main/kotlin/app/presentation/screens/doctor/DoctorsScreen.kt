@@ -51,7 +51,12 @@ fun DoctorsScreen(
                 startValue = uiState.searchText,
                 onValueChange = { onUiEvent(DoctorsUiEvent.UpdateSearchText(it)) }
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Search results: ${doctorData.size}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -120,6 +125,13 @@ fun DoctorsScreen(
                     textDecoration = if (uiState.sort == DoctorsSort.SALARY) TextDecoration.Underline else TextDecoration.None
                 )
             }
+            Divider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp),
+                color = MaterialTheme.colorScheme.onBackground,
+                thickness = 1.dp
+            )
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {

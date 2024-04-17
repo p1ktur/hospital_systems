@@ -1,4 +1,4 @@
-package app.domain.model.shared
+package app.domain.model.shared.drug
 
 data class Drug(
     val id: Int,

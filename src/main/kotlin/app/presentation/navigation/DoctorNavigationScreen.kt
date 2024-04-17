@@ -72,6 +72,10 @@ fun DoctorNavigationScreen() {
                 name = "Find patient",
                 route = "/find_patient/false"
             ),
+            TabNavOption(
+                name = "Drugs",
+                route = "/drugs"
+            )
         ),
         isLoading = isLoading,
         onLogOut = {
@@ -171,22 +175,25 @@ fun DoctorNavigationScreen() {
                     appArgs = AppArgs.DOCTOR
                 )
             }
-            scene(route = "/registration_patient/{forResult}") { navBackStackEntry ->
-                val forResult = navBackStackEntry.path<Boolean>("forResult") ?: false
-                val viewModel = koinViewModel<ClientRegistrationViewModel>()
+            scene(route = "/drugs") {
+                val viewModel = koinViewModel<DrugsViewModel>()
                 val uiState = viewModel.uiState.collectAsState()
 
                 LaunchedEffect(key1 = uiState.value.isLoading, block = {
                     isLoading = uiState.value.isLoading
                 })
 
-                ClientRegistrationScreen(
+                LaunchedEffect(key1 = true, block = {
+                    viewModel.onUiEvent(DrugsUiEvent.Search)
+                })
+
+                DrugsScreen(
                     navController = navController,
                     uiState = uiState.value,
                     onUiEvent = { event ->
                         viewModel.onUiEvent(event)
                     },
-                    forResult = forResult
+                    forResult = false
                 )
             }
             scene(route = "/find_patient/{forResult}") { navBackStackEntry ->
@@ -209,6 +216,24 @@ fun DoctorNavigationScreen() {
                         viewModel.onUiEvent(event)
                     },
                     appArgs = AppArgs.DOCTOR,
+                    forResult = forResult
+                )
+            }
+            scene(route = "/registration_patient/{forResult}") { navBackStackEntry ->
+                val forResult = navBackStackEntry.path<Boolean>("forResult") ?: false
+                val viewModel = koinViewModel<ClientRegistrationViewModel>()
+                val uiState = viewModel.uiState.collectAsState()
+
+                LaunchedEffect(key1 = uiState.value.isLoading, block = {
+                    isLoading = uiState.value.isLoading
+                })
+
+                ClientRegistrationScreen(
+                    navController = navController,
+                    uiState = uiState.value,
+                    onUiEvent = { event ->
+                        viewModel.onUiEvent(event)
+                    },
                     forResult = forResult
                 )
             }
@@ -257,8 +282,9 @@ fun DoctorNavigationScreen() {
                     forResult = forResult
                 )
             }
-            scene(route = "/find_room/{forResult}") { navBackStackEntry ->
+            scene(route = "/find_room/{forResult}/{all}") { navBackStackEntry ->
                 val forResult = navBackStackEntry.path<Boolean>("forResult") ?: false
+                val all = navBackStackEntry.path<Boolean>("forResult") ?: true
                 val viewModel = koinViewModel<RoomsViewModel>()
                 val uiState = viewModel.uiState.collectAsState()
 
@@ -267,7 +293,7 @@ fun DoctorNavigationScreen() {
                 })
 
                 LaunchedEffect(key1 = true, block = {
-                    viewModel.onUiEvent(RoomsUiEvent.Search(all = !forResult))
+                    viewModel.onUiEvent(RoomsUiEvent.Search(all = all))
                 })
 
                 RoomsScreen(

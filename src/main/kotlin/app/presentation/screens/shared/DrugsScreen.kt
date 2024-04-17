@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.text.style.*
 import androidx.compose.ui.unit.*
+import app.domain.model.shared.drug.*
 import app.domain.model.shared.room.*
 import app.domain.tabNavigator.*
 import app.domain.uiEvent.shared.*
@@ -20,13 +21,13 @@ import app.presentation.codes.*
 import app.presentation.components.common.*
 
 @Composable
-fun RoomsScreen(
+fun DrugsScreen(
     navController: NavController,
-    uiState: RoomsUiState,
-    onUiEvent: (RoomsUiEvent) -> Unit,
+    uiState: DrugsUiState,
+    onUiEvent: (DrugsUiEvent) -> Unit,
     forResult: Boolean
 ) {
-    val roomsData = remember(uiState.roomSearchData) { uiState.roomSearchData.toMutableStateList() }
+    val drugsData = remember(uiState.drugSearchData) { uiState.drugSearchData.toMutableStateList() }
 
     Box {
         Column(
@@ -39,7 +40,7 @@ fun RoomsScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = if (forResult) "Choose room" else "Find room",
+                text = if (forResult) "Choose drug" else "Find drug",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center
@@ -57,11 +58,11 @@ fun RoomsScreen(
             }
             SearchTextField(
                 startValue = uiState.searchText,
-                onValueChange = { onUiEvent(RoomsUiEvent.UpdateSearchText(it)) }
+                onValueChange = { onUiEvent(DrugsUiEvent.UpdateSearchText(it)) }
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Search results: ${roomsData.size}",
+                text = "Search results: ${drugsData.size}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -81,58 +82,28 @@ fun RoomsScreen(
                     modifier = Modifier
                         .clickable(
                             onClick = {
-                                onUiEvent(RoomsUiEvent.Sort(RoomsSort.NAME))
+                                onUiEvent(DrugsUiEvent.Sort(DrugsSort.NAME))
                             }
                         )
                         .padding(8.dp),
                     text = "Name",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground,
-                    textDecoration = if (uiState.sort == RoomsSort.NAME) TextDecoration.Underline else TextDecoration.None
-                )
-                if (uiState.preloadedTypes.size > 1) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        modifier = Modifier
-                            .clickable(
-                                onClick = {
-                                    onUiEvent(RoomsUiEvent.Sort(RoomsSort.TYPE))
-                                }
-                            )
-                            .padding(8.dp),
-                        text = "Type",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        textDecoration = if (uiState.sort == RoomsSort.TYPE) TextDecoration.Underline else TextDecoration.None
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    modifier = Modifier
-                        .clickable(
-                            onClick = {
-                                onUiEvent(RoomsUiEvent.Sort(RoomsSort.FLOOR))
-                            }
-                        )
-                        .padding(8.dp),
-                    text = "Floor",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    textDecoration = if (uiState.sort == RoomsSort.FLOOR) TextDecoration.Underline else TextDecoration.None
+                    textDecoration = if (uiState.sort == DrugsSort.NAME) TextDecoration.Underline else TextDecoration.None
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     modifier = Modifier
                         .clickable(
                             onClick = {
-                                onUiEvent(RoomsUiEvent.Sort(RoomsSort.NUMBER))
+                                onUiEvent(DrugsUiEvent.Sort(DrugsSort.AMOUNT))
                             }
                         )
                         .padding(8.dp),
-                    text = "Number",
+                    text = "Amount",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground,
-                    textDecoration = if (uiState.sort == RoomsSort.NUMBER) TextDecoration.Underline else TextDecoration.None
+                    textDecoration = if (uiState.sort == DrugsSort.AMOUNT) TextDecoration.Underline else TextDecoration.None
                 )
             }
             Divider(
@@ -145,7 +116,7 @@ fun RoomsScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-                itemsIndexed(roomsData) { index, room ->
+                itemsIndexed(drugsData) { index, drug ->
                     val isEdited by remember(uiState.editState) {
                         mutableStateOf(uiState.editState is ItemEditState.Editing && uiState.editState.index == index)
                     }
@@ -161,11 +132,13 @@ fun RoomsScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             var nameText by remember { mutableStateOf("") }
-                            var floorText by remember { mutableStateOf("1") }
-                            var numberText by remember { mutableStateOf("101") }
-                            var typeIndex by remember { mutableIntStateOf(0) }
+                            var appliancesText by remember { mutableStateOf("") }
+                            var notesText by remember { mutableStateOf("") }
+                            var amountText by remember { mutableStateOf("0") }
 
-                            Column {
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
                                 DefaultTextField(
                                     startValue = nameText,
                                     label = "Name:",
@@ -173,40 +146,41 @@ fun RoomsScreen(
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 DefaultTextField(
-                                    startValue = floorText,
-                                    label = "Floor:",
-                                    onValueChange = { floorText = it },
-                                    onlyIntegerNumbers = true
+                                    startValue = appliancesText,
+                                    label = "Appliances:",
+                                    maxLength = 255,
+                                    onValueChange = { appliancesText = it }
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 DefaultTextField(
-                                    startValue = numberText,
-                                    label = "Number:",
-                                    onValueChange = { numberText = it }
+                                    startValue = notesText,
+                                    label = "Notes:",
+                                    maxLength = 255,
+                                    onValueChange = { notesText = it }
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
-                                OptionsTextField(
-                                    startValue = uiState.preloadedTypes.getOrNull(typeIndex)?.second.toString(),
-                                    label = "Type:",
-                                    options = uiState.preloadedTypes.map { it.second },
-                                    onOptionSelected = { typeIndex = it }
+                                DefaultTextField(
+                                    startValue = amountText,
+                                    label = "Amount:",
+                                    onValueChange = { amountText = it },
+                                    onlyIntegerNumbers = true
                                 )
                             }
 
                             Column(
                                 horizontalAlignment = Alignment.End
                             ) {
-                                if (floorText.isNotBlank() && numberText.isNotBlank() && nameText.isNotBlank()) {
+                                if (amountText.isNotBlank() && nameText.isNotBlank()) {
                                     Icon(
                                         modifier = Modifier
                                             .size(56.dp)
                                             .clickable(onClick = {
                                                 onUiEvent(
-                                                    RoomsUiEvent.CreateRoom(room.copy(
+                                                    DrugsUiEvent.CreateDrug(drug.copy(
                                                         name = nameText,
-                                                        floor = floorText.toInt(),
-                                                        number = numberText.toInt(),
-                                                        type = uiState.preloadedTypes[typeIndex].second
+                                                        appliances = appliancesText,
+                                                        notes = notesText,
+                                                        amount = amountText.toInt()
                                                     ))
                                                 )
                                             })
@@ -224,18 +198,20 @@ fun RoomsScreen(
                                 .fillMaxWidth()
                                 .clickable(
                                     onClick = {
-                                        navController.goBackWith(room.id)
+                                        navController.goBackWith(drug.id)
                                     }
                                 ),
                             verticalAlignment = Alignment.Bottom,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            var nameText by remember { mutableStateOf(room.name) }
-                            var floorText by remember { mutableStateOf(room.floor.toString()) }
-                            var numberText by remember { mutableStateOf(room.number.toString()) }
-                            var typeIndex by remember { mutableIntStateOf(uiState.preloadedTypes.map { it.second }.indexOf(room.type)) }
+                            var nameText by remember { mutableStateOf(drug.name) }
+                            var appliancesText by remember { mutableStateOf(drug.appliances) }
+                            var notesText by remember { mutableStateOf(drug.notes) }
+                            var amountText by remember { mutableStateOf(drug.amount.toString()) }
 
-                            Column {
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
                                 DefaultTextField(
                                     startValue = nameText,
                                     label = "Name:",
@@ -243,40 +219,41 @@ fun RoomsScreen(
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 DefaultTextField(
-                                    startValue = floorText,
-                                    label = "Floor:",
-                                    onValueChange = { floorText = it },
-                                    onlyIntegerNumbers = true
+                                    startValue = appliancesText,
+                                    label = "Appliances:",
+                                    maxLength = 255,
+                                    onValueChange = { appliancesText = it }
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 DefaultTextField(
-                                    startValue = numberText,
-                                    label = "Number:",
-                                    onValueChange = { numberText = it }
+                                    startValue = notesText,
+                                    label = "Notes:",
+                                    maxLength = 255,
+                                    onValueChange = { notesText = it }
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
-                                OptionsTextField(
-                                    startValue = uiState.preloadedTypes.getOrNull(typeIndex)?.second.toString(),
-                                    label = "Type:",
-                                    options = uiState.preloadedTypes.map { it.second },
-                                    onOptionSelected = { typeIndex = it }
+                                DefaultTextField(
+                                    startValue = amountText,
+                                    label = "Amount:",
+                                    onValueChange = { amountText = it },
+                                    onlyIntegerNumbers = true
                                 )
                             }
 
                             Column(
                                 horizontalAlignment = Alignment.End
                             ) {
-                                if (floorText.isNotBlank() && numberText.isNotBlank() && nameText.isNotBlank()) {
+                                if (amountText.isNotBlank() && nameText.isNotBlank()) {
                                     Icon(
                                         modifier = Modifier
                                             .size(56.dp)
                                             .clickable(onClick = {
                                                 onUiEvent(
-                                                    RoomsUiEvent.UpdateRoom(index, room.copy(
+                                                    DrugsUiEvent.UpdateDrug(index, drug.copy(
                                                         name = nameText,
-                                                        floor = floorText.toInt(),
-                                                        number = numberText.toInt(),
-                                                        type = uiState.preloadedTypes[typeIndex].second
+                                                        appliances = appliancesText,
+                                                        notes = notesText,
+                                                        amount = amountText.toInt()
                                                     ))
                                                 )
                                             })
@@ -296,7 +273,7 @@ fun RoomsScreen(
                                     if (forResult) {
                                         Modifier.clickable(
                                             onClick = {
-                                                navController.goBackWith(room.id)
+                                                navController.goBackWith(drug.id)
                                             }
                                         )
                                     } else {
@@ -305,16 +282,36 @@ fun RoomsScreen(
                                 ),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(
-                                text = "${index + 1}. ${room.name} №${room.number} on ${room.floor.asOrdinal()} floor",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = "${index + 1}. ${drug.name}",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                if (drug.appliances.isNotBlank()) {
+                                    ReducedText(
+                                        text = "Appliances: ${drug.appliances}",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onBackground
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                if (drug.notes.isNotBlank()) {
+                                    ReducedText(
+                                        text = "Notes: ${drug.notes}",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onBackground
+                                    )
+                                }
+                            }
                             Column(
                                 horizontalAlignment = Alignment.End
                             ) {
                                 Text(
-                                    text = room.type,
+                                    text = "Amount: ${drug.amount}",
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onBackground
                                 )
@@ -324,7 +321,7 @@ fun RoomsScreen(
                                         modifier = Modifier
                                             .size(48.dp)
                                             .clickable(onClick = {
-                                                onUiEvent(RoomsUiEvent.EditRoom(index))
+                                                onUiEvent(DrugsUiEvent.EditDrug(index))
                                             })
                                             .padding(8.dp),
                                         imageVector = Icons.Default.Edit,
@@ -336,7 +333,7 @@ fun RoomsScreen(
                                         modifier = Modifier
                                             .size(48.dp)
                                             .clickable(onClick = {
-                                                onUiEvent(RoomsUiEvent.DeleteRoom(index, room))
+                                                onUiEvent(DrugsUiEvent.DeleteDrug(index, drug))
                                             })
                                             .padding(8.dp),
                                         imageVector = Icons.Default.Delete,
@@ -366,7 +363,7 @@ fun RoomsScreen(
                             .size(56.dp)
                             .align(Alignment.TopEnd)
                             .clickable(onClick = {
-                                onUiEvent(RoomsUiEvent.CancelCreating)
+                                onUiEvent(DrugsUiEvent.CancelCreating)
                             })
                             .padding(8.dp),
                         imageVector = Icons.Default.Cancel,
@@ -381,7 +378,7 @@ fun RoomsScreen(
                             .size(56.dp)
                             .align(Alignment.TopEnd)
                             .clickable(onClick = {
-                                onUiEvent(RoomsUiEvent.StartCreating)
+                                onUiEvent(DrugsUiEvent.StartCreating)
                             })
                             .padding(8.dp),
                         imageVector = Icons.Default.Create,

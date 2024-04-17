@@ -3,6 +3,7 @@ package app.domain.viewModel.client
 import app.data.client.*
 import app.domain.database.transactor.*
 import app.domain.model.client.*
+import app.domain.model.doctor.*
 import app.domain.uiEvent.client.*
 import app.domain.uiState.client.*
 import kotlinx.coroutines.*
@@ -15,6 +16,7 @@ class ClientsViewModel(private val clientsRepository: ClientsRepository) : ViewM
     val uiState = _uiState.asStateFlow()
 
     private var fetchedClientData: List<ClientSearchData> = emptyList()
+    private var sortAscending = true
 
     fun onUiEvent(event: ClientsUiEvent) {
         when (event) {
@@ -60,11 +62,27 @@ class ClientsViewModel(private val clientsRepository: ClientsRepository) : ViewM
     }
 
     private fun sort(sort: ClientsSort) {
+        if (uiState.value.isLoading) return
+
+        if (sort == uiState.value.sort) {
+            sortAscending = !sortAscending
+        } else {
+            _uiState.value = uiState.value.copy(
+                sort = sort
+            )
+        }
+
         _uiState.value = uiState.value.copy(
-            sort = sort,
-            clientSearchData = when (sort) {
-                ClientsSort.NAME -> uiState.value.clientSearchData.sortedBy { it.name }
-                ClientsSort.AGE -> uiState.value.clientSearchData.sortedBy { it.age }
+            clientSearchData = if (sortAscending) {
+                when (sort) {
+                    ClientsSort.NAME -> uiState.value.clientSearchData.sortedBy { it.name }
+                    ClientsSort.AGE -> uiState.value.clientSearchData.sortedBy { it.age }
+                }
+            } else {
+                when (sort) {
+                    ClientsSort.NAME -> uiState.value.clientSearchData.sortedByDescending { it.name }
+                    ClientsSort.AGE -> uiState.value.clientSearchData.sortedByDescending { it.age }
+                }
             }
         )
     }

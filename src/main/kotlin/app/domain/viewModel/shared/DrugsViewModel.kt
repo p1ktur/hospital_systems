@@ -3,6 +3,7 @@ package app.domain.viewModel.shared
 import app.data.shared.*
 import app.domain.database.transactor.*
 import app.domain.model.shared.drug.*
+import app.domain.model.shared.equipment.*
 import app.domain.model.shared.room.*
 import app.domain.uiEvent.shared.*
 import app.domain.uiState.shared.*
@@ -12,41 +13,41 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import moe.tlaster.precompose.viewmodel.*
 
-class RoomsViewModel(private val roomsRepository: RoomsRepository) : ViewModel() {
+class DrugsViewModel(private val drugsRepository: DrugsRepository) : ViewModel() {
 
-    private val _uiState: MutableStateFlow<RoomsUiState> = MutableStateFlow(RoomsUiState())
+    private val _uiState: MutableStateFlow<DrugsUiState> = MutableStateFlow(DrugsUiState())
     val uiState = _uiState.asStateFlow()
 
-    private var fetchedRoomData: List<RoomSearchData> = emptyList()
+    private var fetchedDrugData: List<Drug> = emptyList()
     private var sortAscending = true
 
-    fun onUiEvent(event: RoomsUiEvent) {
+    fun onUiEvent(event: DrugsUiEvent) {
         when (event) {
-            is RoomsUiEvent.UpdateSearchText -> updateSearchText(event.text)
-            is RoomsUiEvent.Search -> search(event.all)
-            is RoomsUiEvent.Sort -> sort(event.sort)
+            is DrugsUiEvent.UpdateSearchText -> updateSearchText(event.text)
+            is DrugsUiEvent.Search -> search()
+            is DrugsUiEvent.Sort -> sort(event.sort)
 
-            RoomsUiEvent.StartCreating -> startCreating()
-            is RoomsUiEvent.CreateRoom -> create(event.room)
-            RoomsUiEvent.CancelCreating -> cancelCreating()
-            is RoomsUiEvent.EditRoom -> edit(event.index)
-            RoomsUiEvent.CancelEditing -> cancelEditing()
-            is RoomsUiEvent.UpdateRoom -> update(event.index, event.room)
-            is RoomsUiEvent.DeleteRoom -> delete(event.index, event.room)
+            DrugsUiEvent.StartCreating -> startCreating()
+            is DrugsUiEvent.CreateDrug -> create(event.drug)
+            DrugsUiEvent.CancelCreating -> cancelCreating()
+            is DrugsUiEvent.EditDrug -> edit(event.index)
+            DrugsUiEvent.CancelEditing -> cancelEditing()
+            is DrugsUiEvent.UpdateDrug -> update(event.index, event.drug)
+            is DrugsUiEvent.DeleteDrug -> delete(event.index, event.drug)
         }
     }
 
     private fun updateSearchText(text: String) {
         _uiState.value = uiState.value.copy(
             searchText = text,
-            roomSearchData = fetchedRoomData.filter {
-                (it.name + it.type + it.floor + it.number).contains(text, ignoreCase = true)
+            drugSearchData = fetchedDrugData.filter {
+                (it.name + it.amount).contains(text, ignoreCase = true)
             }
         )
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun search(all: Boolean) {
+    private fun search() {
         if (uiState.value.isLoading) return
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -54,33 +55,21 @@ class RoomsViewModel(private val roomsRepository: RoomsRepository) : ViewModel()
                 isLoading = true
             )
 
-            when (val searchResult = roomsRepository.search(all)) {
+            when (val searchResult = drugsRepository.search()) {
                 is TransactorResult.Failure -> Unit
                 is TransactorResult.Success<*> -> {
-                    fetchedRoomData = searchResult.data as List<RoomSearchData>
+                    fetchedDrugData = searchResult.data as List<Drug>
 
                     _uiState.value = uiState.value.copy(
-                        roomSearchData = fetchedRoomData,
+                        drugSearchData = fetchedDrugData,
                         isLoading = false
                     )
-
-                    when (val typesResult = roomsRepository.preloadTypes()) {
-                        is TransactorResult.Failure -> Unit
-                        is TransactorResult.Success<*> -> {
-                            val preloadedTypes = typesResult.data as List<Pair<Int, String>>
-
-                            _uiState.value = uiState.value.copy(
-                                preloadedTypes = preloadedTypes,
-                                isLoading = false
-                            )
-                        }
-                    }
                 }
             }
         }
     }
 
-    private fun sort(sort: RoomsSort) {
+    private fun sort(sort: DrugsSort) {
         if (_uiState.value.editState != ItemEditState.None || uiState.value.isLoading) return
 
         if (sort == uiState.value.sort) {
@@ -92,19 +81,15 @@ class RoomsViewModel(private val roomsRepository: RoomsRepository) : ViewModel()
         }
 
         _uiState.value = uiState.value.copy(
-            roomSearchData = if (sortAscending) {
+            drugSearchData = if (sortAscending) {
                 when (sort) {
-                    RoomsSort.NAME -> uiState.value.roomSearchData.sortedBy { it.name }
-                    RoomsSort.TYPE -> uiState.value.roomSearchData.sortedBy { it.type }
-                    RoomsSort.FLOOR -> uiState.value.roomSearchData.sortedBy { it.floor }
-                    RoomsSort.NUMBER -> uiState.value.roomSearchData.sortedBy { it.number }
+                    DrugsSort.NAME -> uiState.value.drugSearchData.sortedBy { it.name }
+                    DrugsSort.AMOUNT -> uiState.value.drugSearchData.sortedBy { it.amount }
                 }
             } else {
                 when (sort) {
-                    RoomsSort.NAME -> uiState.value.roomSearchData.sortedByDescending { it.name }
-                    RoomsSort.TYPE -> uiState.value.roomSearchData.sortedByDescending { it.type }
-                    RoomsSort.FLOOR -> uiState.value.roomSearchData.sortedByDescending { it.floor }
-                    RoomsSort.NUMBER -> uiState.value.roomSearchData.sortedByDescending { it.number }
+                    DrugsSort.NAME -> uiState.value.drugSearchData.sortedByDescending { it.name }
+                    DrugsSort.AMOUNT -> uiState.value.drugSearchData.sortedByDescending { it.amount }
                 }
             }
         )
@@ -115,17 +100,17 @@ class RoomsViewModel(private val roomsRepository: RoomsRepository) : ViewModel()
 
         _uiState.value = uiState.value.copy(
             editState = ItemEditState.Creating,
-            roomSearchData = listOf(RoomSearchData(-1, "", "", 0, 0)) + uiState.value.roomSearchData
+            drugSearchData = listOf(Drug(-1, "", "", "", 0)) + uiState.value.drugSearchData
         )
     }
 
-    private fun create(room: RoomSearchData) {
+    private fun create(drug: Drug) {
         if (_uiState.value.editState != ItemEditState.Creating || uiState.value.isLoading) return
 
         _uiState.value = uiState.value.copy(
             editState = ItemEditState.None,
-            roomSearchData = uiState.value.roomSearchData.toMutableList().apply {
-                set(0, room)
+            drugSearchData = uiState.value.drugSearchData.toMutableList().apply {
+                set(0, drug)
             }
         )
 
@@ -133,7 +118,7 @@ class RoomsViewModel(private val roomsRepository: RoomsRepository) : ViewModel()
             _uiState.value = uiState.value.copy(
                 isLoading = true
             )
-            when (val createResult = roomsRepository.create(room)) {
+            when (val createResult = drugsRepository.create(drug)) {
                 is TransactorResult.Failure -> {
                     if (createResult.exception is AlreadyExistsException) {
                         _uiState.value = uiState.value.copy(
@@ -156,7 +141,7 @@ class RoomsViewModel(private val roomsRepository: RoomsRepository) : ViewModel()
 
         _uiState.value = uiState.value.copy(
             editState = ItemEditState.None,
-            roomSearchData = uiState.value.roomSearchData.drop(1)
+            drugSearchData = uiState.value.drugSearchData.drop(1)
         )
     }
 
@@ -176,13 +161,13 @@ class RoomsViewModel(private val roomsRepository: RoomsRepository) : ViewModel()
         )
     }
 
-    private fun update(index: Int, room: RoomSearchData) {
+    private fun update(index: Int, drug: Drug) {
         if (_uiState.value.editState !is ItemEditState.Editing || uiState.value.isLoading) return
 
         _uiState.value = uiState.value.copy(
             editState = ItemEditState.None,
-            roomSearchData = uiState.value.roomSearchData.toMutableList().apply {
-                set(index, room)
+            drugSearchData = uiState.value.drugSearchData.toMutableList().apply {
+                set(index, drug)
             }
         )
 
@@ -190,7 +175,7 @@ class RoomsViewModel(private val roomsRepository: RoomsRepository) : ViewModel()
             _uiState.value = uiState.value.copy(
                 isLoading = true
             )
-            when (val updateResult = roomsRepository.update(room)) {
+            when (val updateResult = drugsRepository.update(drug)) {
                 is TransactorResult.Failure -> {
                     if (updateResult.exception is AlreadyExistsException) {
                         _uiState.value = uiState.value.copy(
@@ -208,12 +193,12 @@ class RoomsViewModel(private val roomsRepository: RoomsRepository) : ViewModel()
         }
     }
 
-    private fun delete(index: Int, room: RoomSearchData) {
+    private fun delete(index: Int, drug: Drug) {
         if (_uiState.value.editState != ItemEditState.None || uiState.value.isLoading) return
 
         _uiState.value = uiState.value.copy(
             editState = ItemEditState.None,
-            roomSearchData = uiState.value.roomSearchData.toMutableList().apply {
+            drugSearchData = uiState.value.drugSearchData.toMutableList().apply {
                 removeAt(index)
             }
         )
@@ -222,7 +207,7 @@ class RoomsViewModel(private val roomsRepository: RoomsRepository) : ViewModel()
             _uiState.value = uiState.value.copy(
                 isLoading = true
             )
-            when (val deleteResult = roomsRepository.delete(room)) {
+            when (val deleteResult = drugsRepository.delete(drug)) {
                 is TransactorResult.Failure -> {
                     if (deleteResult.exception is AlreadyExistsException) {
                         _uiState.value = uiState.value.copy(

@@ -3,7 +3,7 @@ package app.domain.viewModel.shared
 import app.data.shared.*
 import app.domain.database.transactor.*
 import app.domain.model.shared.drug.*
-import app.domain.model.shared.room.*
+import app.domain.model.shared.equipment.*
 import app.domain.uiEvent.shared.*
 import app.domain.uiState.shared.*
 import app.domain.util.editing.*
@@ -12,41 +12,41 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import moe.tlaster.precompose.viewmodel.*
 
-class RoomsViewModel(private val roomsRepository: RoomsRepository) : ViewModel() {
+class EquipmentsViewModel(private val equipmentsRepository: EquipmentsRepository) : ViewModel() {
 
-    private val _uiState: MutableStateFlow<RoomsUiState> = MutableStateFlow(RoomsUiState())
+    private val _uiState: MutableStateFlow<EquipmentsUiState> = MutableStateFlow(EquipmentsUiState())
     val uiState = _uiState.asStateFlow()
 
-    private var fetchedRoomData: List<RoomSearchData> = emptyList()
+    private var fetchedEquipmentData: List<EquipmentSearchData> = emptyList()
     private var sortAscending = true
 
-    fun onUiEvent(event: RoomsUiEvent) {
+    fun onUiEvent(event: EquipmentsUiEvent) {
         when (event) {
-            is RoomsUiEvent.UpdateSearchText -> updateSearchText(event.text)
-            is RoomsUiEvent.Search -> search(event.all)
-            is RoomsUiEvent.Sort -> sort(event.sort)
+            is EquipmentsUiEvent.UpdateSearchText -> updateSearchText(event.text)
+            is EquipmentsUiEvent.Search -> search()
+            is EquipmentsUiEvent.Sort -> sort(event.sort)
 
-            RoomsUiEvent.StartCreating -> startCreating()
-            is RoomsUiEvent.CreateRoom -> create(event.room)
-            RoomsUiEvent.CancelCreating -> cancelCreating()
-            is RoomsUiEvent.EditRoom -> edit(event.index)
-            RoomsUiEvent.CancelEditing -> cancelEditing()
-            is RoomsUiEvent.UpdateRoom -> update(event.index, event.room)
-            is RoomsUiEvent.DeleteRoom -> delete(event.index, event.room)
+            is EquipmentsUiEvent.StartCreating -> startCreating(event.roomId)
+            is EquipmentsUiEvent.CreateEquipment -> create(event.equipment)
+            EquipmentsUiEvent.CancelCreating -> cancelCreating()
+            is EquipmentsUiEvent.EditEquipment -> edit(event.index)
+            EquipmentsUiEvent.CancelEditing -> cancelEditing()
+            is EquipmentsUiEvent.UpdateEquipment -> update(event.index, event.equipment)
+            is EquipmentsUiEvent.DeleteEquipment -> delete(event.index, event.equipment)
         }
     }
 
     private fun updateSearchText(text: String) {
         _uiState.value = uiState.value.copy(
             searchText = text,
-            roomSearchData = fetchedRoomData.filter {
-                (it.name + it.type + it.floor + it.number).contains(text, ignoreCase = true)
+            equipmentSearchData = fetchedEquipmentData.filter {
+                it.name.contains(text, ignoreCase = true)
             }
         )
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun search(all: Boolean) {
+    private fun search() {
         if (uiState.value.isLoading) return
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -54,33 +54,21 @@ class RoomsViewModel(private val roomsRepository: RoomsRepository) : ViewModel()
                 isLoading = true
             )
 
-            when (val searchResult = roomsRepository.search(all)) {
+            when (val searchResult = equipmentsRepository.search()) {
                 is TransactorResult.Failure -> Unit
                 is TransactorResult.Success<*> -> {
-                    fetchedRoomData = searchResult.data as List<RoomSearchData>
+                    fetchedEquipmentData = searchResult.data as List<EquipmentSearchData>
 
                     _uiState.value = uiState.value.copy(
-                        roomSearchData = fetchedRoomData,
+                        equipmentSearchData = fetchedEquipmentData,
                         isLoading = false
                     )
-
-                    when (val typesResult = roomsRepository.preloadTypes()) {
-                        is TransactorResult.Failure -> Unit
-                        is TransactorResult.Success<*> -> {
-                            val preloadedTypes = typesResult.data as List<Pair<Int, String>>
-
-                            _uiState.value = uiState.value.copy(
-                                preloadedTypes = preloadedTypes,
-                                isLoading = false
-                            )
-                        }
-                    }
                 }
             }
         }
     }
 
-    private fun sort(sort: RoomsSort) {
+    private fun sort(sort: EquipmentsSort) {
         if (_uiState.value.editState != ItemEditState.None || uiState.value.isLoading) return
 
         if (sort == uiState.value.sort) {
@@ -92,40 +80,34 @@ class RoomsViewModel(private val roomsRepository: RoomsRepository) : ViewModel()
         }
 
         _uiState.value = uiState.value.copy(
-            roomSearchData = if (sortAscending) {
+            equipmentSearchData = if (sortAscending) {
                 when (sort) {
-                    RoomsSort.NAME -> uiState.value.roomSearchData.sortedBy { it.name }
-                    RoomsSort.TYPE -> uiState.value.roomSearchData.sortedBy { it.type }
-                    RoomsSort.FLOOR -> uiState.value.roomSearchData.sortedBy { it.floor }
-                    RoomsSort.NUMBER -> uiState.value.roomSearchData.sortedBy { it.number }
+                    EquipmentsSort.NAME -> uiState.value.equipmentSearchData.sortedBy { it.name }
                 }
             } else {
                 when (sort) {
-                    RoomsSort.NAME -> uiState.value.roomSearchData.sortedByDescending { it.name }
-                    RoomsSort.TYPE -> uiState.value.roomSearchData.sortedByDescending { it.type }
-                    RoomsSort.FLOOR -> uiState.value.roomSearchData.sortedByDescending { it.floor }
-                    RoomsSort.NUMBER -> uiState.value.roomSearchData.sortedByDescending { it.number }
+                    EquipmentsSort.NAME -> uiState.value.equipmentSearchData.sortedByDescending { it.name }
                 }
             }
         )
     }
 
-    private fun startCreating() {
+    private fun startCreating(roomId: Int) {
         if (_uiState.value.editState != ItemEditState.None || uiState.value.isLoading) return
 
         _uiState.value = uiState.value.copy(
             editState = ItemEditState.Creating,
-            roomSearchData = listOf(RoomSearchData(-1, "", "", 0, 0)) + uiState.value.roomSearchData
+            equipmentSearchData = listOf(EquipmentSearchData(-1, roomId, "", "", null)) + uiState.value.equipmentSearchData
         )
     }
 
-    private fun create(room: RoomSearchData) {
+    private fun create(equipment: EquipmentSearchData) {
         if (_uiState.value.editState != ItemEditState.Creating || uiState.value.isLoading) return
 
         _uiState.value = uiState.value.copy(
             editState = ItemEditState.None,
-            roomSearchData = uiState.value.roomSearchData.toMutableList().apply {
-                set(0, room)
+            equipmentSearchData = uiState.value.equipmentSearchData.toMutableList().apply {
+                set(0, equipment)
             }
         )
 
@@ -133,7 +115,7 @@ class RoomsViewModel(private val roomsRepository: RoomsRepository) : ViewModel()
             _uiState.value = uiState.value.copy(
                 isLoading = true
             )
-            when (val createResult = roomsRepository.create(room)) {
+            when (val createResult = equipmentsRepository.create(equipment)) {
                 is TransactorResult.Failure -> {
                     if (createResult.exception is AlreadyExistsException) {
                         _uiState.value = uiState.value.copy(
@@ -156,7 +138,7 @@ class RoomsViewModel(private val roomsRepository: RoomsRepository) : ViewModel()
 
         _uiState.value = uiState.value.copy(
             editState = ItemEditState.None,
-            roomSearchData = uiState.value.roomSearchData.drop(1)
+            equipmentSearchData = uiState.value.equipmentSearchData.drop(1)
         )
     }
 
@@ -176,13 +158,13 @@ class RoomsViewModel(private val roomsRepository: RoomsRepository) : ViewModel()
         )
     }
 
-    private fun update(index: Int, room: RoomSearchData) {
+    private fun update(index: Int, equipment: EquipmentSearchData) {
         if (_uiState.value.editState !is ItemEditState.Editing || uiState.value.isLoading) return
 
         _uiState.value = uiState.value.copy(
             editState = ItemEditState.None,
-            roomSearchData = uiState.value.roomSearchData.toMutableList().apply {
-                set(index, room)
+            equipmentSearchData = uiState.value.equipmentSearchData.toMutableList().apply {
+                set(index, equipment)
             }
         )
 
@@ -190,7 +172,7 @@ class RoomsViewModel(private val roomsRepository: RoomsRepository) : ViewModel()
             _uiState.value = uiState.value.copy(
                 isLoading = true
             )
-            when (val updateResult = roomsRepository.update(room)) {
+            when (val updateResult = equipmentsRepository.update(equipment)) {
                 is TransactorResult.Failure -> {
                     if (updateResult.exception is AlreadyExistsException) {
                         _uiState.value = uiState.value.copy(
@@ -208,12 +190,12 @@ class RoomsViewModel(private val roomsRepository: RoomsRepository) : ViewModel()
         }
     }
 
-    private fun delete(index: Int, room: RoomSearchData) {
+    private fun delete(index: Int, equipment: EquipmentSearchData) {
         if (_uiState.value.editState != ItemEditState.None || uiState.value.isLoading) return
 
         _uiState.value = uiState.value.copy(
             editState = ItemEditState.None,
-            roomSearchData = uiState.value.roomSearchData.toMutableList().apply {
+            equipmentSearchData = uiState.value.equipmentSearchData.toMutableList().apply {
                 removeAt(index)
             }
         )
@@ -222,7 +204,7 @@ class RoomsViewModel(private val roomsRepository: RoomsRepository) : ViewModel()
             _uiState.value = uiState.value.copy(
                 isLoading = true
             )
-            when (val deleteResult = roomsRepository.delete(room)) {
+            when (val deleteResult = equipmentsRepository.delete(equipment)) {
                 is TransactorResult.Failure -> {
                     if (deleteResult.exception is AlreadyExistsException) {
                         _uiState.value = uiState.value.copy(

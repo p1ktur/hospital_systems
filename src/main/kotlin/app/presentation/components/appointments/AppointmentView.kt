@@ -6,8 +6,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
-import app.domain.model.shared.*
 import app.domain.model.shared.appointment.*
+import app.domain.model.shared.payment.*
 import app.domain.util.args.*
 
 @Composable
