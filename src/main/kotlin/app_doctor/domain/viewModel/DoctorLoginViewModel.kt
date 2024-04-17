@@ -1,9 +1,9 @@
 package app_doctor.domain.viewModel
 
 import app_doctor.data.*
-import app_shared.domain.model.exceptions.*
-import app_shared.domain.model.login.*
 import app_shared.domain.model.database.transactor.*
+import app_shared.domain.model.util.exceptions.*
+import app_shared.domain.model.util.login.*
 import app_shared.domain.uiEvent.*
 import app_shared.domain.uiState.*
 import kotlinx.coroutines.*

@@ -1,12 +1,10 @@
 package app_shared.presentation.components.dialog
 
 import androidx.compose.desktop.ui.tooling.preview.*
-import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.graphics.*
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.*
@@ -17,6 +15,7 @@ import java.util.*
 
 @Composable
 fun DateTimePickerDialog(
+    title: String? = null,
     visible: Boolean,
     onClose: () -> Unit,
     onDateTimePicked: (Date) -> Unit
@@ -98,7 +97,7 @@ fun DateTimePickerDialog(
         undecorated = true
     ) {
         DialogWindowTitleBar(
-            title = "Select date and time",
+            title = title ?: "Select date and time",
             onClose = onClose
         ) {
             Column(

@@ -7,7 +7,7 @@ sealed class AppointmentsUiEvent {
     data class FetchAppointmentsForDoctor(val userWorkerId: Int) : AppointmentsUiEvent()
     data class FetchAppointmentsForClient(val userClientId: Int) : AppointmentsUiEvent()
 
-    data class CreateAppointment(val userWorkerId: Int, val userClientId: Int, val date: Date) : AppointmentsUiEvent()
+    data class CreateAppointment(val selfUserWorkerId: Int, val userWorkerId: Int, val userClientId: Int, val date: Date) : AppointmentsUiEvent()
     data class CreateAppointmentResult(val userWorkerId: Int, val appointmentId: Int, val price: Float, val notes: String) : AppointmentsUiEvent()
     data class PayForAppointment(val userClientId: Int, val appointmentResultId: Int, val payedAmount: Float, val payedAccount: String) : AppointmentsUiEvent()
     data class DeleteAppointment(val userWorkerId: Int, val appointmentId: Int) : AppointmentsUiEvent()

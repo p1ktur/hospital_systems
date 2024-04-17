@@ -9,9 +9,9 @@ import app_client.presentation.screens.*
 import app_doctor.domain.uiEvent.*
 import app_doctor.domain.viewModel.*
 import app_doctor.presentation.screens.*
-import app_shared.domain.model.args.*
-import app_shared.domain.model.login.*
 import app_shared.domain.model.tabNavigator.*
+import app_shared.domain.model.util.args.*
+import app_shared.domain.model.util.login.*
 import app_shared.domain.uiEvent.*
 import app_shared.domain.viewModel.*
 import app_shared.presentation.components.common.*
@@ -74,8 +74,11 @@ fun ClientNavigationScreen() {
         NavHost(
             modifier = Modifier.fillMaxSize(),
             navigator = navController.navigator,
-            initialRoute = "/info/patient/${(loginStatus as? LoginStatus.LoggedIn)?.userId}"
+            initialRoute = "/welcome"
         ) {
+            scene(route = "/welcome") {
+                WelcomeScreen(AppArgs.DOCTOR)
+            }
             scene(route = "/info/patient/{userClientId}") { navBackStackEntry ->
                 val userClientId = navBackStackEntry.path<Int>("userClientId") ?: -1
                 val viewModel = koinViewModel<ClientInfoViewModel>()
@@ -123,16 +126,25 @@ fun ClientNavigationScreen() {
             }
             scene(route = "/hospitalizations/{userClientId}") { navBackStackEntry ->
                 val userClientId = navBackStackEntry.path<Int>("userClientId") ?: -1
-//                val viewModel = koinViewModel<ClientInfoViewModel>()
-//                val uiState = viewModel.uiState.collectAsState()
-//
-//                ClientInfoScreen(
-//                    navigator = navigator,
-//                    uiState = uiState.value,
-//                    onUiEvent = { event ->
-//                        viewModel.onUiEvent(event)
-//                    }
-//                )
+                val viewModel = koinViewModel<HospitalizationsViewModel>()
+                val uiState = viewModel.uiState.collectAsState()
+
+                LaunchedEffect(key1 = uiState.value.isLoading, block = {
+                    isLoading = uiState.value.isLoading
+                })
+
+                LaunchedEffect(key1 = true, block = {
+                    viewModel.onUiEvent(HospitalizationsUiEvent.FetchHospitalizationsForClient(userClientId))
+                })
+
+                HospitalizationsScreen(
+                    navController = navController,
+                    uiState = uiState.value,
+                    onUiEvent = { event ->
+                        viewModel.onUiEvent(event)
+                    },
+                    appArgs = AppArgs.CLIENT
+                )
             }
             scene(route = "/info/worker/{userDoctorId}") { navBackStackEntry ->
                 val userDoctorId = navBackStackEntry.path<Int>("userDoctorId") ?: -1

@@ -2,6 +2,7 @@ package app_admin.domain.uiEvent
 
 sealed class WorkerRegistrationUiEvent {
     data object Register : WorkerRegistrationUiEvent()
+    data object ForgetRegistration : WorkerRegistrationUiEvent()
 
     data class UpdateName(val name: String) : WorkerRegistrationUiEvent()
     data class UpdateSurname(val surname: String) : WorkerRegistrationUiEvent()
@@ -12,6 +13,7 @@ sealed class WorkerRegistrationUiEvent {
     data class UpdateEmail(val email: String) : WorkerRegistrationUiEvent()
     data class UpdatePosition(val position: String) : WorkerRegistrationUiEvent()
     data class UpdateSalary(val salary: String) : WorkerRegistrationUiEvent()
+    data class UpdateCanReceiveAppointments(val canReceiveAppointments: Boolean) : WorkerRegistrationUiEvent()
     data class UpdateLogin(val login: String) : WorkerRegistrationUiEvent()
     data class UpdatePassword(val password: String) : WorkerRegistrationUiEvent()
 }

@@ -9,6 +9,7 @@ import androidx.compose.ui.*
 
 @Composable
 fun SearchTextField(
+    modifier : Modifier = Modifier,
     startValue: String,
     onValueChange: (String) -> Unit
 ) {
@@ -17,7 +18,7 @@ fun SearchTextField(
     }
 
     TextField(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         value = text,
         onValueChange = { newValue ->
             text = newValue

@@ -13,9 +13,9 @@ import app_doctor.di.*
 import app_doctor.presentation.navigation.*
 import app_shared.data.*
 import app_shared.di.*
-import app_shared.domain.model.args.*
 import app_shared.domain.model.theme.*
 import app_shared.domain.model.database.transactor.*
+import app_shared.domain.model.util.args.*
 import app_shared.presentation.components.window.*
 import app_shared.presentation.theme.*
 import com.hospital.systems.hospitalsystems.generated.resources.*

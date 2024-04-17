@@ -3,9 +3,10 @@ package app_admin.domain.viewModel
 import app_admin.data.*
 import app_admin.domain.uiEvent.*
 import app_admin.domain.uiState.*
-import app_shared.domain.model.exceptions.*
-import app_shared.domain.model.regex.*
 import app_shared.domain.model.database.transactor.*
+import app_shared.domain.model.util.exceptions.*
+import app_shared.domain.model.util.regex.*
+import app_shared.domain.model.util.result.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import moe.tlaster.precompose.viewmodel.*
@@ -18,6 +19,7 @@ class WorkerRegistrationViewModel(private val workerRegistrationRepository: Work
     fun onUiEvent(event: WorkerRegistrationUiEvent) {
         when (event) {
             WorkerRegistrationUiEvent.Register -> register()
+            WorkerRegistrationUiEvent.ForgetRegistration -> forgetRegistration()
 
             is WorkerRegistrationUiEvent.UpdateAddress -> updateAddress(event.address)
             is WorkerRegistrationUiEvent.UpdateAge -> updateAge(event.age)
@@ -30,6 +32,7 @@ class WorkerRegistrationViewModel(private val workerRegistrationRepository: Work
             is WorkerRegistrationUiEvent.UpdateSurname -> updateSurname(event.surname)
             is WorkerRegistrationUiEvent.UpdatePosition -> updatePosition(event.position)
             is WorkerRegistrationUiEvent.UpdateSalary -> updateSalary(event.salary)
+            is WorkerRegistrationUiEvent.UpdateCanReceiveAppointments -> updateCanReceiveAppointments(event.canReceiveAppointments)
         }
     }
 
@@ -111,33 +114,20 @@ class WorkerRegistrationViewModel(private val workerRegistrationRepository: Work
                     errorCodes = errorCodes
                 )
 
-                val registerResult = if (uiState.value.login.isEmpty() || uiState.value.password.isEmpty()) {
-                    workerRegistrationRepository.register(
-                        name = uiState.value.name,
-                        surname = uiState.value.surname,
-                        fathersName = uiState.value.fathersName,
-                        age = uiState.value.age,
-                        address = uiState.value.address,
-                        phone = uiState.value.phone,
-                        email = uiState.value.email,
-                        position = uiState.value.position,
-                        salary = uiState.value.salary
-                    )
-                } else {
-                    workerRegistrationRepository.register(
-                        name = uiState.value.name,
-                        surname = uiState.value.surname,
-                        fathersName = uiState.value.fathersName,
-                        age = uiState.value.age,
-                        address = uiState.value.address,
-                        phone = uiState.value.phone,
-                        email = uiState.value.email,
-                        position = uiState.value.position,
-                        salary = uiState.value.salary,
-                        login = uiState.value.login,
-                        password = uiState.value.password
-                    )
-                }
+                val registerResult = workerRegistrationRepository.register(
+                    name = uiState.value.name,
+                    surname = uiState.value.surname,
+                    fathersName = uiState.value.fathersName,
+                    age = uiState.value.age,
+                    address = uiState.value.address,
+                    phone = uiState.value.phone,
+                    email = uiState.value.email,
+                    position = uiState.value.position,
+                    salary = uiState.value.salary,
+                    canReceiveAppointments = uiState.value.canReceiveAppointments,
+                    login = uiState.value.login,
+                    password = uiState.value.password
+                )
 
                 when (registerResult) {
                     is TransactorResult.Failure -> {
@@ -154,8 +144,10 @@ class WorkerRegistrationViewModel(private val workerRegistrationRepository: Work
                         println("Unable to register because: ${registerResult.exception?.message}")
                     }
                     is TransactorResult.Success<*> -> {
+                        val userWorkerId = registerResult.data as Int
                         _uiState.value = uiState.value.copy(
-                            isLoading = false
+                            isLoading = false,
+                            registrationResult = TaskResult.Success(userWorkerId)
                         )
                     }
                 }
@@ -166,6 +158,12 @@ class WorkerRegistrationViewModel(private val workerRegistrationRepository: Work
                 )
             }
         }
+    }
+
+    private fun forgetRegistration() {
+        _uiState.value = uiState.value.copy(
+            registrationResult = TaskResult.NotCompleted
+        )
     }
 
     private fun updateSurname(surname: String) = _uiState.update { it.copy(surname = surname) }
@@ -189,4 +187,6 @@ class WorkerRegistrationViewModel(private val workerRegistrationRepository: Work
     private fun updatePosition(position: String) = _uiState.update { it.copy(position = position) }
 
     private fun updateSalary(salary: String) = _uiState.update { it.copy(salary = salary) }
+
+    private fun updateCanReceiveAppointments(canReceiveAppointments: Boolean) = _uiState.update { it.copy(canReceiveAppointments = canReceiveAppointments) }
 }

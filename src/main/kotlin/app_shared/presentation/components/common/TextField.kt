@@ -12,7 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.*
-import app_shared.domain.model.regex.*
+import app_shared.domain.model.util.regex.*
 
 @Composable
 fun DefaultTextField(

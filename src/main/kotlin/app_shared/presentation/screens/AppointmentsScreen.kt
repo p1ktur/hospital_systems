@@ -12,9 +12,9 @@ import androidx.compose.ui.*
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.text.style.*
 import androidx.compose.ui.unit.*
-import app_shared.domain.model.args.*
-import app_shared.domain.model.database.dbModels.*
+import app_shared.domain.model.forShared.appointment.*
 import app_shared.domain.model.tabNavigator.*
+import app_shared.domain.model.util.args.*
 import app_shared.domain.uiEvent.*
 import app_shared.domain.uiState.*
 import app_shared.presentation.codes.*
@@ -81,7 +81,7 @@ fun AppointmentsScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(8))
-                                .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8))
+                                .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(8))
                                 .border(2.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(8)),
                             appointment = appointment,
                             appointmentResult = appointmentResult,
@@ -132,9 +132,10 @@ fun AppointmentsScreen(
                     onUiEvent(AppointmentsUiEvent.HideDateTimePickerDialog)
                 },
                 onDateTimePicked = { date ->
-                    if (uiState.userWorkerIdForAppointment != null && uiState.userClientIdForAppointment != null) {
+                    if (userDoctorId != null && uiState.userWorkerIdForAppointment != null && uiState.userClientIdForAppointment != null) {
                         onUiEvent(
                             AppointmentsUiEvent.CreateAppointment(
+                                selfUserWorkerId = userDoctorId,
                                 userWorkerId = uiState.userWorkerIdForAppointment,
                                 userClientId = uiState.userClientIdForAppointment,
                                 date = date
@@ -145,28 +146,56 @@ fun AppointmentsScreen(
                     onUiEvent(AppointmentsUiEvent.HideDateTimePickerDialog)
                 }
             )
-            Icon(
-                modifier = Modifier
-                    .size(56.dp)
-                    .align(Alignment.TopEnd)
-                    .clickable(onClick = {
-                        if (navigatingToCreateAppointmentJob == null) {
-                            navigatingToCreateAppointmentJob = coroutineScope.launch {
-                                val userClientId = navController.navigateForResult("/find_patient/true") as Int?
+            Row(
+                modifier = Modifier.align(Alignment.TopEnd)
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clickable(onClick = {
+                            if (navigatingToCreateAppointmentJob == null) {
+                                navigatingToCreateAppointmentJob = coroutineScope.launch {
+                                    val userWorkerId = navController.navigateForResult("/find_worker/true") as Int?
 
-                                if (userDoctorId != null && userClientId != null) {
-                                    onUiEvent(AppointmentsUiEvent.ShowDateTimePickerDialog(userDoctorId, userClientId))
+                                    if (userWorkerId != null) {
+                                        val userClientId = navController.navigateForResult("/find_patient/true") as Int?
+
+                                        if (userClientId != null) {
+                                            onUiEvent(AppointmentsUiEvent.ShowDateTimePickerDialog(userWorkerId, userClientId))
+                                        }
+                                    }
+
+                                    navigatingToCreateAppointmentJob = null
                                 }
-
-                                navigatingToCreateAppointmentJob = null
                             }
-                        }
-                    })
-                    .padding(8.dp),
-                imageVector = Icons.Default.Add,
-                contentDescription = "Add appointment",
-                tint = MaterialTheme.colorScheme.onBackground
-            )
+                        })
+                        .padding(8.dp),
+                    imageVector = Icons.Default.PersonAdd,
+                    contentDescription = "Add appointment to a doctor",
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
+                Icon(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clickable(onClick = {
+                            if (navigatingToCreateAppointmentJob == null) {
+                                navigatingToCreateAppointmentJob = coroutineScope.launch {
+                                    val userClientId = navController.navigateForResult("/find_patient/true") as Int?
+
+                                    if (userDoctorId != null && userClientId != null) {
+                                        onUiEvent(AppointmentsUiEvent.ShowDateTimePickerDialog(userDoctorId, userClientId))
+                                    }
+
+                                    navigatingToCreateAppointmentJob = null
+                                }
+                            }
+                        })
+                        .padding(8.dp),
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add appointment",
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
+            }
         }
     }
 }

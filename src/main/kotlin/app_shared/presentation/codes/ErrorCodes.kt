@@ -5,6 +5,7 @@ fun parseDefaultErrorCode(code: Int): String {
         1001 -> "Couldn't load resource."
         1002 -> "Specify schedule fully."
         1003 -> "Couldn't upload resource."
+        1101 -> "Room at this location already exists."
         else -> "Unknown error."
     }
 }

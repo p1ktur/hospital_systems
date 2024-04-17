@@ -6,8 +6,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
-import app_shared.domain.model.args.*
-import app_shared.domain.model.database.dbModels.*
+import app_shared.domain.model.forShared.*
+import app_shared.domain.model.forShared.appointment.*
+import app_shared.domain.model.util.args.*
 
 @Composable
 fun AppointmentView(
@@ -27,7 +28,7 @@ fun AppointmentView(
                     onClick?.invoke()
                 }
             )
-            .padding(8.dp),
+            .padding(vertical = 12.dp, horizontal = 20.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column {
@@ -36,7 +37,7 @@ fun AppointmentView(
                     Text(
                         text = "Your appointment with ",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
                         modifier = Modifier.clickable(
@@ -46,14 +47,14 @@ fun AppointmentView(
                         ),
                         text = appointment.doctorName,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
                 AppArgs.DOCTOR -> Row {
                     Text(
                         text = "Your appointment with ",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
                         modifier = Modifier.clickable(
@@ -63,7 +64,7 @@ fun AppointmentView(
                         ),
                         text = appointment.clientName,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
                 AppArgs.ADMIN -> Row {
@@ -75,12 +76,12 @@ fun AppointmentView(
                         ),
                         text = "${appointment.doctorName}\'s ",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
                         text = "appointment with ",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
                         modifier = Modifier.clickable(
@@ -90,7 +91,7 @@ fun AppointmentView(
                         ),
                         text = appointment.doctorName,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }
@@ -99,7 +100,7 @@ fun AppointmentView(
             Text(
                 text = "on ${appointment.date}",
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
         Column(
@@ -112,7 +113,7 @@ fun AppointmentView(
                     "Finished for ${appointmentResult.price}"
                 },
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
@@ -122,7 +123,7 @@ fun AppointmentView(
                     "Payed ${payment.payedAmount}"
                 },
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
     }

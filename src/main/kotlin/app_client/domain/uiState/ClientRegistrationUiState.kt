@@ -1,6 +1,6 @@
 package app_client.domain.uiState
 
-import app_shared.domain.model.result.*
+import app_shared.domain.model.util.result.*
 
 data class ClientRegistrationUiState(
     val name: String = "",

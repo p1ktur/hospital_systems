@@ -3,10 +3,10 @@ package app_client.domain.viewModel
 import app_client.data.*
 import app_client.domain.uiEvent.*
 import app_client.domain.uiState.*
-import app_shared.domain.model.exceptions.*
-import app_shared.domain.model.regex.*
-import app_shared.domain.model.result.*
 import app_shared.domain.model.database.transactor.*
+import app_shared.domain.model.util.exceptions.*
+import app_shared.domain.model.util.regex.*
+import app_shared.domain.model.util.result.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import moe.tlaster.precompose.viewmodel.*

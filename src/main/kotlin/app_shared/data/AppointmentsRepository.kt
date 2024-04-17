@@ -1,8 +1,8 @@
 package app_shared.data
 
-import app_shared.domain.model.*
-import app_shared.domain.model.database.dbModels.*
 import app_shared.domain.model.database.transactor.*
+import app_shared.domain.model.forShared.*
+import app_shared.domain.model.forShared.appointment.*
 import java.sql.*
 import java.time.format.*
 

@@ -7,10 +7,10 @@ import org.koin.dsl.*
 val clientModule = module {
     single { ClientInfoRepository(get()) }
     single { ClientLoginRegistrationRepository(get()) }
-    single { FindClientRepository(get()) }
+    single { ClientsRepository(get()) }
 
     factory { ClientInfoViewModel(get()) }
     factory { ClientLoginViewModel(get()) }
     factory { ClientRegistrationViewModel(get()) }
-    factory { FindClientViewModel(get()) }
+    factory { ClientsViewModel(get()) }
 }

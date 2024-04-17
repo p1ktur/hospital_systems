@@ -1,14 +1,14 @@
 package app_shared.domain.viewModel
 
 import app_shared.data.*
-import app_shared.domain.model.*
 import app_shared.domain.model.database.transactor.*
+import app_shared.domain.model.forShared.appointment.*
 import app_shared.domain.uiEvent.*
 import app_shared.domain.uiState.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import moe.tlaster.precompose.viewmodel.*
-import java.util.Date
+import java.util.*
 
 class AppointmentsViewModel(
     private val appointmentsRepository: AppointmentsRepository
@@ -23,7 +23,7 @@ class AppointmentsViewModel(
             is AppointmentsUiEvent.FetchAppointmentsForDoctor -> fetchAppointmentsForDoctor(event.userWorkerId)
             is AppointmentsUiEvent.FetchAppointmentsForClient -> fetchAppointmentsForClient(event.userClientId)
 
-            is AppointmentsUiEvent.CreateAppointment -> createAppointment(event.userWorkerId, event.userClientId, event.date)
+            is AppointmentsUiEvent.CreateAppointment -> createAppointment(event.selfUserWorkerId, event.userWorkerId, event.userClientId, event.date)
             is AppointmentsUiEvent.CreateAppointmentResult -> createAppointmentResult(event.userWorkerId, event.appointmentId, event.price, event.notes)
             is AppointmentsUiEvent.PayForAppointment -> payForAppointment(event.userClientId, event.appointmentResultId, event.payedAmount, event.payedAccount)
             is AppointmentsUiEvent.DeleteAppointment -> deleteAppointment(event.userWorkerId, event.appointmentId)
@@ -125,7 +125,7 @@ class AppointmentsViewModel(
         }
     }
 
-    private fun createAppointment(userWorkerId: Int, userClientId: Int, date: Date) {
+    private fun createAppointment(selfUserWorkerId: Int, userWorkerId: Int, userClientId: Int, date: Date) {
         if (uiState.value.isLoading) return
 
         _uiState.value = uiState.value.copy(
@@ -146,7 +146,7 @@ class AppointmentsViewModel(
                         errorCodes = emptyList()
                     )
 
-                    fetchAppointmentsForDoctor(userWorkerId)
+                    if (selfUserWorkerId == userWorkerId) fetchAppointmentsForDoctor(selfUserWorkerId)
                 }
             }
         }

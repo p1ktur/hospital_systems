@@ -1,8 +1,8 @@
 package app_doctor.data
 
 import app_doctor.domain.model.*
-import app_shared.domain.model.database.dbModels.*
 import app_shared.domain.model.database.transactor.*
+import app_shared.domain.model.forShared.room.*
 
 class DoctorInfoRepository(private val transactor: ITransactor) {
 

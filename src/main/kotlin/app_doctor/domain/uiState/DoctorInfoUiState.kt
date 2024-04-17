@@ -1,6 +1,6 @@
 package app_doctor.domain.uiState
 
-import app_shared.domain.model.database.dbModels.*
+import app_shared.domain.model.forShared.room.*
 
 data class DoctorInfoUiState(
     val editMode: Boolean = false,

@@ -8,15 +8,37 @@ import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
 import app_admin.domain.uiEvent.*
 import app_admin.domain.uiState.*
+import app_shared.domain.model.tabNavigator.*
+import app_shared.domain.model.util.result.*
 import app_shared.presentation.codes.*
 import app_shared.presentation.components.common.*
 import app_shared.presentation.theme.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkerRegistrationScreen(
+    navController: NavController,
     uiState: WorkerRegistrationUiState,
-    onUiEvent: (WorkerRegistrationUiEvent) -> Unit
+    onUiEvent: (WorkerRegistrationUiEvent) -> Unit,
+    forResult: Boolean
 ) {
+    LaunchedEffect(key1 = uiState.registrationResult, block = {
+        when (uiState.registrationResult) {
+            TaskResult.Failure -> Unit
+            TaskResult.NotCompleted -> Unit
+            is TaskResult.Success<*> -> {
+                val userDoctorId = uiState.registrationResult.data as? Int
+
+                if (forResult) {
+                    navController.goBackWith(userDoctorId)
+                } else {
+                    navController.navigate("/info/worker/${userDoctorId}")
+                }
+                onUiEvent(WorkerRegistrationUiEvent.ForgetRegistration)
+            }
+        }
+    })
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -146,7 +168,25 @@ fun WorkerRegistrationScreen(
                 errorText = if (uiState.errorCodes.contains(1014)) parseWorkerRegistrationErrorCode(1014) else null
             )
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Can receive appointments",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Checkbox(
+                checked = uiState.canReceiveAppointments,
+                onCheckedChange = { newValue ->
+                    onUiEvent(WorkerRegistrationUiEvent.UpdateCanReceiveAppointments(newValue))
+                }
+            )
+        }
+        Spacer(modifier = Modifier.height(24.dp))
         Text(
             modifier = Modifier.fillMaxWidth(),
             text = "Account info",

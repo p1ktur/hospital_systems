@@ -25,7 +25,7 @@ fun TabNavigator(
     content: @Composable BoxScope.(NavController) -> Unit
 ) {
     val navigationRouteStack = remember { mutableStateListOf<String>() }
-    var currentRoute by remember { mutableStateOf(navOptions.firstOrNull()?.route) }
+    var currentRoute by remember { mutableStateOf<String?>(null) }
 
     val navigator = rememberNavigator()
     val navController by remember(navigator) {
@@ -43,6 +43,7 @@ fun TabNavigator(
         mutableStateOf(navController)
     }
     val canNavControllerGoBack by navController.canGoBack.collectAsState(false)
+    val currentEntry by navigator.currentEntry.collectAsState(null)
 
     var isMenuExpanded by remember { mutableStateOf(false) }
     val menuOptions = remember {
@@ -83,6 +84,13 @@ fun TabNavigator(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 navOptions.forEachIndexed { index, tabNavOption ->
+                    val firstCheck = navController.compareRoutes(currentRoute, tabNavOption.route)
+                    val secondCheck = navOptions.any { option ->
+                        currentEntry?.route?.route?.let {
+                            navController.compareRoutes(it, option.route)
+                        } ?: false
+                    }
+
                     Text(
                         modifier = Modifier
                             .clickable(onClick = {
@@ -92,7 +100,7 @@ fun TabNavigator(
                                 }
                             })
                             .then(
-                                if (navController.compareRoutes(currentRoute, tabNavOption.route)) {
+                                if (firstCheck && secondCheck) {
                                     Modifier.background(MaterialTheme.colorScheme.primaryContainer)
                                 } else {
                                     Modifier
@@ -101,7 +109,7 @@ fun TabNavigator(
                             .padding(8.dp),
                         text = tabNavOption.name,
                         style = MaterialTheme.typography.titleSmall,
-                        color = if (navController.compareRoutes(currentRoute, tabNavOption.route)) {
+                        color = if (firstCheck && secondCheck) {
                             MaterialTheme.colorScheme.onPrimaryContainer
                         } else {
                             MaterialTheme.colorScheme.onPrimary

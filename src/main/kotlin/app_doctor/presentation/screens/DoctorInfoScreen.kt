@@ -11,7 +11,7 @@ import androidx.compose.ui.text.style.*
 import androidx.compose.ui.unit.*
 import app_doctor.domain.uiEvent.*
 import app_doctor.domain.uiState.*
-import app_shared.domain.model.numbers.*
+import app_shared.domain.model.util.numbers.*
 import app_shared.presentation.codes.*
 import app_shared.presentation.components.common.*
 import app_shared.presentation.theme.*

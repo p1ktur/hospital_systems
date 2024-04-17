@@ -11,8 +11,8 @@ import androidx.compose.ui.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.*
-import app_shared.domain.model.args.*
 import app_shared.domain.model.theme.*
+import app_shared.domain.model.util.args.*
 import com.hospital.systems.hospitalsystems.generated.resources.*
 import org.jetbrains.compose.resources.*
 
@@ -94,14 +94,14 @@ private fun TitleBarContent(
         Image(
             modifier = Modifier
                 .fillMaxHeight()
-                .padding(4.dp)
+                .padding(vertical = 4.dp, horizontal = 8.dp)
                 .aspectRatio(1f),
             painter = painterResource(Res.drawable.app_icon),
             contentDescription = "App icon",
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondaryContainer, BlendMode.SrcAtop)
         )
         Text(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp),
             text = "Hospital Systems" + when (appArgs) {
                 AppArgs.CLIENT -> ". Client app"
                 AppArgs.DOCTOR -> ". Doctor app"

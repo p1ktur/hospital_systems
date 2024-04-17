@@ -9,15 +9,36 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.*
 import app_client.domain.uiEvent.*
 import app_client.domain.uiState.*
+import app_shared.domain.model.tabNavigator.*
+import app_shared.domain.model.util.result.*
 import app_shared.presentation.codes.*
 import app_shared.presentation.components.common.*
 import app_shared.presentation.theme.*
 
 @Composable
 fun ClientRegistrationScreen(
+    navController: NavController,
     uiState: ClientRegistrationUiState,
-    onUiEvent: (ClientRegistrationUiEvent) -> Unit
+    onUiEvent: (ClientRegistrationUiEvent) -> Unit,
+    forResult: Boolean
 ) {
+    LaunchedEffect(key1 = uiState.registrationResult, block = {
+        when (uiState.registrationResult) {
+            TaskResult.Failure -> Unit
+            TaskResult.NotCompleted -> Unit
+            is TaskResult.Success<*> -> {
+                val userClientId = uiState.registrationResult.data as? Int
+
+                if (forResult) {
+                    navController.goBackWith(userClientId)
+                } else {
+                    navController.navigate("/info/patient/${userClientId}")
+                }
+                onUiEvent(ClientRegistrationUiEvent.ForgetRegistration)
+            }
+        }
+    })
+
     Column(
         modifier = Modifier
             .fillMaxSize()

@@ -1,7 +1,7 @@
 package app_client.data
 
-import app_shared.domain.model.exceptions.*
 import app_shared.domain.model.database.transactor.*
+import app_shared.domain.model.util.exceptions.*
 
 class ClientLoginRegistrationRepository(private val transactor: ITransactor) {
 

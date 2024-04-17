@@ -1,7 +1,7 @@
 package app_admin.data
 
-import app_shared.domain.model.exceptions.*
 import app_shared.domain.model.database.transactor.*
+import app_shared.domain.model.util.exceptions.*
 
 class WorkerRegistrationRepository(private val transactor: ITransactor) {
 
@@ -15,6 +15,7 @@ class WorkerRegistrationRepository(private val transactor: ITransactor) {
         position: String,
         salary: String,
         email: String,
+        canReceiveAppointments: Boolean,
         login: String,
         password: String
     ): TransactorResult = transactor.startTransaction(
@@ -28,7 +29,7 @@ class WorkerRegistrationRepository(private val transactor: ITransactor) {
                 return@startTransaction TransactorResult.Failure(AlreadyExistsException(1012, "Login is occupied"))
             }
 
-            val registerStatement = prepareStatement("SELECT registerWorker(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+            val registerStatement = prepareStatement("SELECT registerWorker(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
             registerStatement.setString(1, name)
             registerStatement.setString(2, surname)
             registerStatement.setString(3, fathersName)
@@ -40,37 +41,11 @@ class WorkerRegistrationRepository(private val transactor: ITransactor) {
             registerStatement.setFloat(9, if (salary.isBlank()) 0f else salary.toFloat())
             registerStatement.setString(10, login)
             registerStatement.setString(11, password)
-            registerStatement.executeQuery()
+            registerStatement.setBoolean(12, canReceiveAppointments)
+            val registerResult = registerStatement.executeQuery()
+            registerResult.next()
 
-            TransactorResult.Success("Success")
-        }
-    )
-
-    fun register(
-        name: String,
-        surname: String,
-        fathersName: String,
-        age: String,
-        address: String,
-        phone: String,
-        position: String,
-        salary: String,
-        email: String
-    ): TransactorResult = transactor.startTransaction(
-        transaction = {
-            val registerStatement = prepareStatement("INSERT INTO worker (name, surname, fathers_name, age, address, phone, email, position, salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
-            registerStatement.setString(1, name)
-            registerStatement.setString(2, surname)
-            registerStatement.setString(3, fathersName)
-            registerStatement.setInt(4, age.toInt())
-            registerStatement.setString(5, address)
-            registerStatement.setString(6, phone)
-            registerStatement.setString(7, email)
-            registerStatement.setString(8, position)
-            registerStatement.setFloat(9, if (salary.isBlank()) 0f else salary.toFloat())
-            registerStatement.executeUpdate()
-
-            TransactorResult.Success("Success")
+            TransactorResult.Success(registerResult.getInt(1))
         }
     )
 }

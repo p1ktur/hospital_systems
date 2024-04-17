@@ -1,6 +1,7 @@
 package app_shared.domain.uiState
 
-import app_shared.domain.model.database.dbModels.*
+import app_shared.domain.model.forShared.*
+import app_shared.domain.model.forShared.appointment.*
 
 data class AppointmentsUiState(
     val editMode: Boolean = false,

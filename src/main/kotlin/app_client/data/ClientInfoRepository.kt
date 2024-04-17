@@ -1,7 +1,6 @@
 package app_client.data
 
 import app_client.domain.model.*
-import app_shared.domain.model.database.*
 import app_shared.domain.model.database.transactor.*
 import java.time.format.*
 
@@ -12,7 +11,7 @@ class ClientInfoRepository(private val transactor: ITransactor) {
         val userClientResult = userClientStatement.executeQuery("SELECT user_id, medical_card_id FROM user_client WHERE id = $userClientId")
         userClientResult.next()
 
-        val medCardStatement = prepareStatement("SELECT creation_date, hospitalization_id FROM medical_card WHERE id = ?")
+        val medCardStatement = prepareStatement("SELECT creation_date FROM medical_card WHERE id = ?")
         medCardStatement.setInt(1, userClientResult.getInt(2))
         val medCardResult = medCardStatement.executeQuery()
         medCardResult.next()
@@ -20,7 +19,15 @@ class ClientInfoRepository(private val transactor: ITransactor) {
         val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm")
         val registrationDate = medCardResult.getTimestamp(1).toLocalDateTime().format(formatter)
 
-        val isHospitalized = medCardResult.getIntOrNull(2).run { this != null }
+        val hospitalizationStatement = prepareStatement("SELECT end_date FROM hospitalization WHERE medical_card_id = ?")
+        hospitalizationStatement.setInt(1, userClientResult.getInt(2))
+        val hospitalizationResult = hospitalizationStatement.executeQuery()
+
+        val isHospitalized = if (hospitalizationResult.next()) {
+            hospitalizationResult.getTimestamp(1).run { this != null }
+        } else {
+            false
+        }
 
         val pendingAppointmentsStatement = prepareStatement("SELECT COUNT(*) FROM appointment " +
                 "LEFT JOIN medical_card ON appointment.medical_card_id = medical_card.id " +
@@ -34,7 +41,7 @@ class ClientInfoRepository(private val transactor: ITransactor) {
                 "LEFT JOIN medical_card ON appointment.medical_card_id = medical_card.id" +
                 " WHERE medical_card.id = ? AND appointment.result_id IS NOT NULL")
         visitedAppointmentsStatement.setInt(1, userClientResult.getInt(2))
-        val visitedAppointmentsResult = pendingAppointmentsStatement.executeQuery()
+        val visitedAppointmentsResult = visitedAppointmentsStatement.executeQuery()
         visitedAppointmentsResult.next()
         val visitedAppointments = visitedAppointmentsResult.getInt(1)
 
@@ -54,7 +61,7 @@ class ClientInfoRepository(private val transactor: ITransactor) {
                 "LEFT JOIN payment ON appointment_result.payment_id = payment.id " +
                 "WHERE medical_card.id = ? AND payment.payed_amount IS NOT NULL AND payment.payed_amount > 0")
         payedPaymentsStatement.setInt(1, userClientResult.getInt(2))
-        val payedPaymentsResult = pendingAppointmentsStatement.executeQuery()
+        val payedPaymentsResult = payedPaymentsStatement.executeQuery()
         payedPaymentsResult.next()
         val payedPayments = payedPaymentsResult.getInt(1)
 
