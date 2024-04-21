@@ -175,7 +175,7 @@ class DatabaseInitializer(
             val name = vocabulary.names.random(random)
             val surname = vocabulary.surnames.random(random)
             val login = "${name}_${vocabulary.nicknames.random(random)}_${1985 + random.nextInt(35)}"
-            val password = "${name}123"
+            val password = "${name}1234"
 
             clientLoginRegistrationRepository.register(
                 name = name,
@@ -204,7 +204,7 @@ class DatabaseInitializer(
             val name = vocabulary.names.random(random)
             val surname = vocabulary.surnames.random(random)
             val login = "${name}_${vocabulary.nicknames.random(random)}_${1985 + random.nextInt(35)}"
-            val password = "${name}123"
+            val password = "${name}1234"
 
             doctorLoginRegistrationRepository.register(
                 name = name,

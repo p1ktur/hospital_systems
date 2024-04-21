@@ -62,7 +62,7 @@ fun DoctorNavigationScreen() {
             ),
             TabNavOption(
                 name = "Appointments",
-                route = "/appointments/${(loginStatus as? LoginStatus.LoggedIn)?.userId}"
+                route = "/appointments/${(loginStatus as? LoginStatus.LoggedIn)?.userId}/null"
             ),
             TabNavOption(
                 name = "Hospitalizations",
