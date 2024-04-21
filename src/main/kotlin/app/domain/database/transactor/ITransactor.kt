@@ -11,4 +11,10 @@ interface ITransactor {
         onException: ((Exception) -> Unit)? = null,
         transaction: Connection.() -> TransactorResult
     ): TransactorResult
+
+    suspend fun startSuspendTransaction(
+        onSQLException: (suspend (SQLException) -> Unit)? = null,
+        onException: (suspend (Exception) -> Unit)? = null,
+        transaction: suspend Connection.() -> TransactorResult
+    ): TransactorResult
 }

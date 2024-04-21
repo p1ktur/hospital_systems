@@ -18,6 +18,10 @@ fun LoginScreen(
     uiState: LoginUiState,
     onUiEvent: (LoginUiEvent) -> Unit
 ) {
+    val errorCodes = remember(uiState.errorCodes, uiState.isLoading) {
+        uiState.errorCodes.toMutableStateList()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -36,7 +40,7 @@ fun LoginScreen(
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground
         )
-        if (uiState.errorCodes.contains(1013)) {
+        if (errorCodes.contains(1013)) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = parseLoginErrorCode(1013),

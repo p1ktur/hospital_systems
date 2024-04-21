@@ -1,8 +1,8 @@
 package app.domain.uiEvent.shared
 
 sealed class HospitalizationsUiEvent {
-    data object FetchHospitalizationsForDoctorOrAdmin : HospitalizationsUiEvent()
-    data class FetchHospitalizationsForClient(val userClientId: Int) : HospitalizationsUiEvent()
+    data class FetchHospitalizationsForDoctorOrAdmin(val openId: Int?) : HospitalizationsUiEvent()
+    data class FetchHospitalizationsForClient(val userClientId: Int, val openId: Int?) : HospitalizationsUiEvent()
 
     data class StartCreatingHospitalization(val userClientId: Int, val roomId: Int) : HospitalizationsUiEvent()
     data class CreateHospitalization(val reason: String, val price: Float) : HospitalizationsUiEvent()

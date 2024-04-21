@@ -58,11 +58,15 @@ fun ClientNavigationScreen() {
             ),
             TabNavOption(
                 name = "Appointments",
-                route = "/appointments/${(loginStatus as? LoginStatus.LoggedIn)?.userId}"
+                route = "/appointments/${(loginStatus as? LoginStatus.LoggedIn)?.userId}/null"
             ),
             TabNavOption(
                 name = "Hospitalizations",
-                route = "/hospitalizations/${(loginStatus as? LoginStatus.LoggedIn)?.userId}"
+                route = "/hospitalizations/${(loginStatus as? LoginStatus.LoggedIn)?.userId}/null"
+            ),
+            TabNavOption(
+                name = "Payments",
+                route = "/payments/${(loginStatus as? LoginStatus.LoggedIn)?.userId}"
             )
         ),
         isLoading = isLoading,
@@ -101,8 +105,9 @@ fun ClientNavigationScreen() {
                     canEdit = false
                 )
             }
-            scene(route = "/appointments/{userClientId}") { navBackStackEntry ->
+            scene(route = "/appointments/{userClientId}/{openId}") { navBackStackEntry ->
                 val userClientId = navBackStackEntry.path<Int>("userClientId") ?: -1
+                val openId = navBackStackEntry.path<Int>("openId")
                 val viewModel = koinViewModel<AppointmentsViewModel>()
                 val uiState = viewModel.uiState.collectAsState()
 
@@ -111,7 +116,7 @@ fun ClientNavigationScreen() {
                 })
 
                 LaunchedEffect(key1 = true, block = {
-                    viewModel.onUiEvent(AppointmentsUiEvent.FetchAppointmentsForClient(userClientId))
+                    viewModel.onUiEvent(AppointmentsUiEvent.FetchAppointmentsForClient(userClientId, openId))
                 })
 
                 AppointmentsScreen(
@@ -124,8 +129,9 @@ fun ClientNavigationScreen() {
                     appArgs = AppArgs.CLIENT
                 )
             }
-            scene(route = "/hospitalizations/{userClientId}") { navBackStackEntry ->
+            scene(route = "/hospitalizations/{userClientId}/{openId}") { navBackStackEntry ->
                 val userClientId = navBackStackEntry.path<Int>("userClientId") ?: -1
+                val openId = navBackStackEntry.path<Int>("openId")
                 val viewModel = koinViewModel<HospitalizationsViewModel>()
                 val uiState = viewModel.uiState.collectAsState()
 
@@ -134,7 +140,7 @@ fun ClientNavigationScreen() {
                 })
 
                 LaunchedEffect(key1 = true, block = {
-                    viewModel.onUiEvent(HospitalizationsUiEvent.FetchHospitalizationsForClient(userClientId))
+                    viewModel.onUiEvent(HospitalizationsUiEvent.FetchHospitalizationsForClient(userClientId, openId))
                 })
 
                 HospitalizationsScreen(
@@ -144,6 +150,29 @@ fun ClientNavigationScreen() {
                         viewModel.onUiEvent(event)
                     },
                     appArgs = AppArgs.CLIENT
+                )
+            }
+            scene(route = "/payments/{userClientId}") { navBackStackEntry ->
+                val userClientId = navBackStackEntry.path<Int>("userClientId") ?: -1
+                val viewModel = koinViewModel<PaymentsViewModel>()
+                val uiState = viewModel.uiState.collectAsState()
+
+                LaunchedEffect(key1 = uiState.value.isLoading, block = {
+                    isLoading = uiState.value.isLoading
+                })
+
+                LaunchedEffect(key1 = true, block = {
+                    viewModel.onUiEvent(PaymentsUiEvent.FetchPaymentsForClient(userClientId))
+                })
+
+                PaymentsScreen(
+                    navController = navController,
+                    uiState = uiState.value,
+                    onUiEvent = { event ->
+                        viewModel.onUiEvent(event)
+                    },
+                    appArgs = AppArgs.CLIENT,
+                    userClientId = userClientId
                 )
             }
             scene(route = "/info/worker/{userDoctorId}") { navBackStackEntry ->

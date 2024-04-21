@@ -66,7 +66,11 @@ fun DoctorNavigationScreen() {
             ),
             TabNavOption(
                 name = "Hospitalizations",
-                route = "/hospitalizations"
+                route = "/hospitalizations/null/null"
+            ),
+            TabNavOption(
+                name = "Payments",
+                route = "/payments/${(loginStatus as? LoginStatus.LoggedIn)?.userId}"
             ),
             TabNavOption(
                 name = "Find patient",
@@ -131,8 +135,9 @@ fun DoctorNavigationScreen() {
                     uiState = uiState.value
                 )
             }
-            scene(route = "/appointments/{userDoctorId}") { navBackStackEntry ->
+            scene(route = "/appointments/{userDoctorId}/{openId}") { navBackStackEntry ->
                 val userDoctorId = navBackStackEntry.path<Int>("userDoctorId") ?: -1
+                val openId = navBackStackEntry.path<Int>("openId")
                 val viewModel = koinViewModel<AppointmentsViewModel>()
                 val uiState = viewModel.uiState.collectAsState()
 
@@ -141,7 +146,7 @@ fun DoctorNavigationScreen() {
                 })
 
                 LaunchedEffect(key1 = true, block = {
-                    viewModel.onUiEvent(AppointmentsUiEvent.FetchAppointmentsForDoctor(userDoctorId))
+                    viewModel.onUiEvent(AppointmentsUiEvent.FetchAppointmentsForDoctor(userDoctorId, openId))
                 })
 
                 AppointmentsScreen(
@@ -154,7 +159,8 @@ fun DoctorNavigationScreen() {
                     appArgs = AppArgs.DOCTOR
                 )
             }
-            scene(route = "/hospitalizations") {
+            scene(route = "/hospitalizations/null/{openId}") { navBackStackEntry ->
+                val openId = navBackStackEntry.path<Int>("openId")
                 val viewModel = koinViewModel<HospitalizationsViewModel>()
                 val uiState = viewModel.uiState.collectAsState()
 
@@ -163,7 +169,7 @@ fun DoctorNavigationScreen() {
                 })
 
                 LaunchedEffect(key1 = true, block = {
-                    viewModel.onUiEvent(HospitalizationsUiEvent.FetchHospitalizationsForDoctorOrAdmin)
+                    viewModel.onUiEvent(HospitalizationsUiEvent.FetchHospitalizationsForDoctorOrAdmin(openId))
                 })
 
                 HospitalizationsScreen(
@@ -173,6 +179,29 @@ fun DoctorNavigationScreen() {
                         viewModel.onUiEvent(event)
                     },
                     appArgs = AppArgs.DOCTOR
+                )
+            }
+            scene(route = "/payments/{userDoctorId}") {navBackStackEntry ->
+                val userDoctorId = navBackStackEntry.path<Int>("userDoctorId") ?: -1
+                val viewModel = koinViewModel<PaymentsViewModel>()
+                val uiState = viewModel.uiState.collectAsState()
+
+                LaunchedEffect(key1 = uiState.value.isLoading, block = {
+                    isLoading = uiState.value.isLoading
+                })
+
+                LaunchedEffect(key1 = true, block = {
+                    viewModel.onUiEvent(PaymentsUiEvent.FetchPaymentsForDoctorOrAdmin)
+                })
+
+                PaymentsScreen(
+                    navController = navController,
+                    uiState = uiState.value,
+                    onUiEvent = { event ->
+                        viewModel.onUiEvent(event)
+                    },
+                    appArgs = AppArgs.DOCTOR,
+                    userDoctorId = userDoctorId
                 )
             }
             scene(route = "/drugs") {

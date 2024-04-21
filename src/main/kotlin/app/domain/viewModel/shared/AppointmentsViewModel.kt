@@ -10,18 +10,16 @@ import kotlinx.coroutines.flow.*
 import moe.tlaster.precompose.viewmodel.*
 import java.util.*
 
-class AppointmentsViewModel(
-    private val appointmentsRepository: AppointmentsRepository
-) : ViewModel() {
+class AppointmentsViewModel(private val appointmentsRepository: AppointmentsRepository) : ViewModel() {
 
     private val _uiState: MutableStateFlow<AppointmentsUiState> = MutableStateFlow(AppointmentsUiState())
     val uiState = _uiState.asStateFlow()
 
     fun onUiEvent(event: AppointmentsUiEvent) {
         when (event) {
-            AppointmentsUiEvent.FetchAppointmentsForAdmin -> fetchAppointmentsForAdmin()
-            is AppointmentsUiEvent.FetchAppointmentsForDoctor -> fetchAppointmentsForDoctor(event.userWorkerId)
-            is AppointmentsUiEvent.FetchAppointmentsForClient -> fetchAppointmentsForClient(event.userClientId)
+            is AppointmentsUiEvent.FetchAppointmentsForAdmin -> fetchAppointmentsForAdmin(event.openId)
+            is AppointmentsUiEvent.FetchAppointmentsForDoctor -> fetchAppointmentsForDoctor(event.userWorkerId, event.openId)
+            is AppointmentsUiEvent.FetchAppointmentsForClient -> fetchAppointmentsForClient(event.userClientId, event.openId)
 
             is AppointmentsUiEvent.CreateAppointment -> createAppointment(event.selfUserWorkerId, event.userWorkerId, event.userClientId, event.date)
             is AppointmentsUiEvent.CreateAppointmentResult -> createAppointmentResult(event.userWorkerId, event.appointmentId, event.price, event.notes)
@@ -38,7 +36,7 @@ class AppointmentsViewModel(
         }
     }
 
-    private fun fetchAppointmentsForAdmin() {
+    private fun fetchAppointmentsForAdmin(openId: Int?) {
         if (uiState.value.isLoading) return
 
         _uiState.value = uiState.value.copy(
@@ -60,14 +58,15 @@ class AppointmentsViewModel(
                         appointments = data.appointments,
                         results = data.appointmentResults,
                         payments = data.payments,
-                        errorCodes = emptyList()
+                        errorCodes = emptyList(),
+                        openId = openId
                     )
                 }
             }
         }
     }
 
-    private fun fetchAppointmentsForDoctor(userWorkerId: Int) {
+    private fun fetchAppointmentsForDoctor(userWorkerId: Int, openId: Int?) {
         if (uiState.value.isLoading) return
 
         _uiState.value = uiState.value.copy(
@@ -89,14 +88,15 @@ class AppointmentsViewModel(
                         appointments = data.appointments,
                         results = data.appointmentResults,
                         payments = data.payments,
-                        errorCodes = emptyList()
+                        errorCodes = emptyList(),
+                        openId = openId
                     )
                 }
             }
         }
     }
 
-    private fun fetchAppointmentsForClient(userClientId: Int) {
+    private fun fetchAppointmentsForClient(userClientId: Int, openId: Int?) {
         if (uiState.value.isLoading) return
 
         _uiState.value = uiState.value.copy(
@@ -118,7 +118,8 @@ class AppointmentsViewModel(
                         appointments = data.appointments,
                         results = data.appointmentResults,
                         payments = data.payments,
-                        errorCodes = emptyList()
+                        errorCodes = emptyList(),
+                        openId = openId
                     )
                 }
             }
@@ -146,7 +147,7 @@ class AppointmentsViewModel(
                         errorCodes = emptyList()
                     )
 
-                    if (selfUserWorkerId == userWorkerId) fetchAppointmentsForDoctor(selfUserWorkerId)
+                    if (selfUserWorkerId == userWorkerId) fetchAppointmentsForDoctor(selfUserWorkerId, null)
                 }
             }
         }
@@ -173,7 +174,7 @@ class AppointmentsViewModel(
                         errorCodes = emptyList()
                     )
 
-                    fetchAppointmentsForDoctor(userWorkerId)
+                    fetchAppointmentsForDoctor(userWorkerId, null)
                 }
             }
         }
@@ -200,7 +201,7 @@ class AppointmentsViewModel(
                         errorCodes = emptyList()
                     )
 
-                    fetchAppointmentsForClient(userClientId)
+                    fetchAppointmentsForClient(userClientId, null)
                 }
             }
         }
@@ -230,7 +231,7 @@ class AppointmentsViewModel(
                             errorCodes = emptyList()
                         )
 
-                        fetchAppointmentsForDoctor(userWorkerId)
+                        fetchAppointmentsForDoctor(userWorkerId, null)
                     }
                 }
             } else {
@@ -265,7 +266,7 @@ class AppointmentsViewModel(
                         errorCodes = emptyList()
                     )
 
-                    fetchAppointmentsForDoctor(userWorkerId)
+                    fetchAppointmentsForDoctor(userWorkerId, null)
                 }
             }
         }
@@ -294,7 +295,7 @@ class AppointmentsViewModel(
                         errorCodes = emptyList()
                     )
 
-                    fetchAppointmentsForDoctor(userWorkerId)
+                    fetchAppointmentsForDoctor(userWorkerId, null)
                 }
             }
         }

@@ -61,12 +61,10 @@ class DoctorLoginViewModel(private val doctorLoginRegistrationRepository: Doctor
                 when (loginResult) {
                     is TransactorResult.Failure -> {
                         if (loginResult.exception is WrongCredentialsException) {
-                            errorCodes.add(loginResult.exception.code)
                             _uiState.value = uiState.value.copy(
-                                errorCodes = errorCodes
+                                errorCodes = listOf(loginResult.exception.code)
                             )
                         }
-
                         _uiState.value = uiState.value.copy(
                             isLoading = false
                         )

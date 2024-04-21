@@ -38,6 +38,19 @@ fun AppointmentsScreen(
 
     var navigatingToCreateAppointmentJob: Job? = null
 
+    LaunchedEffect(key1 = uiState.openId, block = {
+        if (uiState.openId != null) {
+            val foundAppointment = uiState.appointments.find { it.id == uiState.openId }
+            val foundAppointmentResult = uiState.results.find { it.id == foundAppointment?.resultId }
+
+            if (foundAppointment != null && foundAppointmentResult != null) {
+                dialogAppointment = foundAppointment
+                dialogResultNotesAndPrice = foundAppointmentResult.let { it.notes to it.price }
+                onUiEvent(AppointmentsUiEvent.ShowInfoDialog)
+            }
+        }
+    })
+
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -78,15 +91,11 @@ fun AppointmentsScreen(
                             mutableStateOf(appointmentResult?.let { result -> uiState.payments.find { it.id == result.paymentId } })
                         }
                         AppointmentView(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(8))
-                                .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(8))
-                                .border(2.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(8)),
                             appointment = appointment,
                             appointmentResult = appointmentResult,
                             payment = payment,
                             appArgs = appArgs,
+                            isSelected = dialogAppointment == appointment,
                             onClick = {
                                 dialogAppointment = appointment
                                 dialogResultNotesAndPrice = appointmentResult?.let { it.notes to it.price }
@@ -305,6 +314,12 @@ private fun AppointmentInfoDialog(
                                 onlyNumbers = true
                             )
                             Spacer(modifier = Modifier.height(8.dp))
+                        } else {
+                            Text(
+                                text = "Price: $priceText$",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
                         }
                         DefaultTextField(
                             startValue = notesText,

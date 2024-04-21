@@ -3,9 +3,9 @@ package app.domain.uiEvent.shared
 import java.util.Date
 
 sealed class AppointmentsUiEvent {
-    data object FetchAppointmentsForAdmin : AppointmentsUiEvent()
-    data class FetchAppointmentsForDoctor(val userWorkerId: Int) : AppointmentsUiEvent()
-    data class FetchAppointmentsForClient(val userClientId: Int) : AppointmentsUiEvent()
+    data class FetchAppointmentsForAdmin(val openId: Int?) : AppointmentsUiEvent()
+    data class FetchAppointmentsForDoctor(val userWorkerId: Int, val openId: Int?) : AppointmentsUiEvent()
+    data class FetchAppointmentsForClient(val userClientId: Int, val openId: Int?) : AppointmentsUiEvent()
 
     data class CreateAppointment(val selfUserWorkerId: Int, val userWorkerId: Int, val userClientId: Int, val date: Date) : AppointmentsUiEvent()
     data class CreateAppointmentResult(val userWorkerId: Int, val appointmentId: Int, val price: Float, val notes: String) : AppointmentsUiEvent()

@@ -63,4 +63,30 @@ class HospitalDatabase : AutoCloseable, ITransactor {
     } finally {
         connection.commit()
     }
+
+    override suspend fun startSuspendTransaction(
+        onSQLException: (suspend (SQLException) -> Unit)?,
+        onException: (suspend (Exception) -> Unit)?,
+        transaction: suspend Connection.() -> TransactorResult
+    ): TransactorResult = try {
+        connection.transaction()
+    } catch (e: SQLException) {
+        e.printStackTrace()
+        onSQLException?.invoke(e)
+
+        try {
+            connection.rollback()
+        } catch (e: SQLException) {
+            onSQLException?.invoke(e)
+        }
+
+        TransactorResult.Failure(e)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        onException?.invoke(e)
+
+        TransactorResult.Failure(e)
+    } finally {
+        connection.commit()
+    }
 }

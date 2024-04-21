@@ -34,11 +34,21 @@ fun HospitalizationsScreen(
 
     var dialogHospitalization by remember { mutableStateOf<Hospitalization?>(null) }
 
-    var navigatingToCreateAppointmentJob: Job? = null
+    var navigatingToCreateHospitalizationJob: Job? = null
 
     LaunchedEffect(key1 = uiState.hospitalizations, block = {
         if (dialogHospitalization != null) {
             dialogHospitalization = uiState.hospitalizations.find { it.id == dialogHospitalization?.id }
+        }
+    })
+
+    LaunchedEffect(key1 = uiState.openId, block = {
+        if (uiState.openId != null) {
+            val foundHospitalization = uiState.hospitalizations.find { it.id == uiState.openId }
+            if (foundHospitalization != null) {
+                dialogHospitalization = foundHospitalization
+                onUiEvent(HospitalizationsUiEvent.ShowInfoDialog)
+            }
         }
     })
 
@@ -80,14 +90,10 @@ fun HospitalizationsScreen(
                         }
 
                         HospitalizationView(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(8))
-                                .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(8))
-                                .border(2.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(8)),
                             hospitalization = hospitalization,
                             payment = payment,
                             appArgs = appArgs,
+                            isSelected = dialogHospitalization == hospitalization,
                             onClick = {
                                 dialogHospitalization = hospitalization
                                 onUiEvent(HospitalizationsUiEvent.ShowInfoDialog)
@@ -126,8 +132,8 @@ fun HospitalizationsScreen(
                     modifier = Modifier
                         .size(56.dp)
                         .clickable(onClick = {
-                            if (navigatingToCreateAppointmentJob == null) {
-                                navigatingToCreateAppointmentJob = coroutineScope.launch {
+                            if (navigatingToCreateHospitalizationJob == null) {
+                                navigatingToCreateHospitalizationJob = coroutineScope.launch {
                                     val userClientId = navController.navigateForResult("/find_patient/true") as Int?
 
                                     if (userClientId != null) {
@@ -138,7 +144,7 @@ fun HospitalizationsScreen(
                                         }
                                     }
 
-                                    navigatingToCreateAppointmentJob = null
+                                    navigatingToCreateHospitalizationJob = null
                                 }
                             }
                         })
@@ -240,6 +246,12 @@ private fun HospitalizationInfoDialog(
                                 onlyNumbers = true
                             )
                             Spacer(modifier = Modifier.height(8.dp))
+                        } else {
+                            Text(
+                                text = "Price: $priceText$",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
                         }
                         DefaultTextField(
                             startValue = reasonText,

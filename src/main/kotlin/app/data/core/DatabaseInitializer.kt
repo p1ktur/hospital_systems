@@ -65,9 +65,15 @@ class DatabaseInitializer(
             }
         }
 
-        val drugStatement = prepareStatement("INSERT INTO drug (id, name, appliances, notes, amount) VALUES (?, ?, ?, ?, ?) ON CONFLICT DO NOTHING")
+        val roomLocationSequenceStatement = createStatement()
+        roomLocationSequenceStatement.executeUpdate("ALTER SEQUENCE room_location_id_seq RESTART WITH $roomLocationIndex")
 
-        parseDrugsCSV(random).forEach { drug ->
+        val roomSequenceStatement = createStatement()
+        roomSequenceStatement.executeUpdate("ALTER SEQUENCE room_id_seq RESTART WITH $roomLocationIndex")
+
+        val drugStatement = prepareStatement("INSERT INTO drug (id, name, appliances, notes, amount) VALUES (?, ?, ?, ?, ?) ON CONFLICT DO NOTHING")
+        val parsedDrugs = parseDrugsCSV(random)
+        parsedDrugs.forEach { drug ->
             drugStatement.setInt(1, drug.id)
             drugStatement.setString(2, drug.name)
             drugStatement.setString(3, drug.appliances)
@@ -77,12 +83,15 @@ class DatabaseInitializer(
             drugStatement.executeUpdate()
         }
 
+        val drugSequenceStatement = createStatement()
+        drugSequenceStatement.executeUpdate("ALTER SEQUENCE drug_id_seq RESTART WITH ${parsedDrugs.last().id}")
+
         val equipmentStatement = prepareStatement("INSERT INTO equipment (id, room_id, name, notes) VALUES (?, ?, ?, ?) ON CONFLICT DO NOTHING")
 
-        var equipmentLocationIndex = 0
+        var equipmentIndex = 0
         for (i in 1..roomLocationIndex) {
             for (j in 0 until random.nextInt(3, 6)) {
-                equipmentStatement.setInt(1, ++equipmentLocationIndex)
+                equipmentStatement.setInt(1, ++equipmentIndex)
                 equipmentStatement.setInt(2, i)
                 equipmentStatement.setString(
                     3,
@@ -97,6 +106,9 @@ class DatabaseInitializer(
                 equipmentStatement.executeUpdate()
             }
         }
+
+        val equipmentSequenceStatement = createStatement()
+        equipmentSequenceStatement.executeUpdate("ALTER SEQUENCE equipment_id_seq RESTART WITH $equipmentIndex")
 
         TransactorResult.Success("Success")
     }

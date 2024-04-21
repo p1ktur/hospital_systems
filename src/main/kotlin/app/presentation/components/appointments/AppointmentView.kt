@@ -2,9 +2,11 @@ package app.presentation.components.appointments
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.draw.*
 import androidx.compose.ui.unit.*
 import app.domain.model.shared.appointment.*
 import app.domain.model.shared.payment.*
@@ -12,17 +14,26 @@ import app.domain.util.args.*
 
 @Composable
 fun AppointmentView(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     appointment: Appointment,
     appointmentResult: AppointmentResult?,
-    payment: Payment?,
+    payment: Payment.Default?,
     appArgs: AppArgs,
+    isSelected: Boolean,
     onClick: (() -> Unit)? = null,
     onDoctorNameClick: (() -> Unit)? = null,
     onClientNameClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8))
+            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(8))
+            .border(
+                2.dp,
+                if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                RoundedCornerShape(8)
+            )
             .clickable(
                 onClick = {
                     onClick?.invoke()
@@ -89,7 +100,7 @@ fun AppointmentView(
                                 onClientNameClick?.invoke()
                             }
                         ),
-                        text = appointment.doctorName,
+                        text = appointment.clientName,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )

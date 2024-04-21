@@ -14,7 +14,7 @@ class AppointmentsRepository(private val transactor: ITransactor) {
 
         val appointments = mutableListOf<Appointment>()
         val appointmentResults = mutableListOf<AppointmentResult>()
-        val payments = mutableListOf<Payment>()
+        val payments = mutableListOf<Payment.Default>()
 
         while (userWorkersResult.next()) {
             when (val fetchResult = fetchAppointmentsForDoctor(userWorkersResult.getInt(1))) {
@@ -99,11 +99,16 @@ class AppointmentsRepository(private val transactor: ITransactor) {
         val payments = buildList {
             val formatter = DateTimeFormatter.ofPattern("HH:mm")
             while (paymentsResult.next()) add(
-                Payment(
+                Payment.Default(
                     id = paymentsResult.getInt(1),
                     payedAmount = paymentsResult.getFloat(2),
                     payedAccount = paymentsResult.getString(3),
-                    time = paymentsResult.getTime(4).toLocalTime().format(formatter)
+                    time = paymentsResult.getTime(4).toLocalTime().format(formatter),
+                    helpIdType = 0,
+                    helpId = -1,
+                    clientName = "",
+                    clientLogin = "",
+                    userClientId = -1
                 )
             )
         }
@@ -181,11 +186,16 @@ class AppointmentsRepository(private val transactor: ITransactor) {
         val payments = buildList {
             val formatter = DateTimeFormatter.ofPattern("HH:mm")
             while (paymentsResult.next()) add(
-                Payment(
+                Payment.Default(
                     id = paymentsResult.getInt(1),
                     payedAmount = paymentsResult.getFloat(2),
                     payedAccount = paymentsResult.getString(3),
-                    time = paymentsResult.getTime(4).toLocalTime().format(formatter)
+                    time = paymentsResult.getTime(4).toLocalTime().format(formatter),
+                    helpIdType = 0,
+                    helpId = -1,
+                    clientName = clientName,
+                    clientLogin = clientLogin,
+                    userClientId = userClientId
                 )
             )
         }

@@ -17,16 +17,22 @@ val sharedModule = module {
 
     single { Vocabulary() }
     single { DatabaseInitializer(get(), get()) }
+    single { DatabaseDataExporter(get()) }
 
     single { AppointmentsRepository(get()) }
     single { HospitalizationsRepository(get()) }
     single { RoomsRepository(get()) }
     single { DrugsRepository(get()) }
     single { EquipmentsRepository(get(), get()) }
+    single { PaymentsRepository(get()) }
+    single { StatisticsRepository(get()) }
 
+    single { AdminViewModel(get()) }
     factory { AppointmentsViewModel(get()) }
     factory { HospitalizationsViewModel(get()) }
     factory { RoomsViewModel(get()) }
     factory { DrugsViewModel(get()) }
     factory { EquipmentsViewModel(get()) }
+    factory { PaymentsViewModel(get()) }
+    single { StatisticsViewModel(get()) }
 }

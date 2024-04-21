@@ -16,22 +16,30 @@ import app.presentation.components.common.*
 import app.presentation.screens.client.*
 import app.presentation.screens.doctor.*
 import app.presentation.screens.shared.*
+import com.darkrockstudios.libraries.mpfilepicker.*
 import moe.tlaster.precompose.koin.*
 import moe.tlaster.precompose.navigation.*
 
 @Composable
 fun AdminNavigationScreen() {
+    val adminViewModel = koinViewModel<AdminViewModel>()
+
+    var showDirPickerForExportData by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
 
     TabNavigator(
         navOptions = listOf(
             TabNavOption(
                 name = "Appointments",
-                route = "/appointments"
+                route = "/appointments/null/null"
             ),
             TabNavOption(
                 name = "Hospitalizations",
-                route = "/hospitalizations"
+                route = "/hospitalizations/null/null"
+            ),
+            TabNavOption(
+                name = "Payments",
+                route = "/payments"
             ),
             TabNavOption(
                 name = "Find worker",
@@ -57,6 +65,14 @@ fun AdminNavigationScreen() {
                 name = "Statistics",
                 route = "/statistics"
             ),
+        ),
+        menuOptions = listOf(
+            MenuOption(
+                text = "Export data",
+                onClick = {
+                    showDirPickerForExportData = true
+                }
+            )
         ),
         isLoading = isLoading
     ) { navController ->
@@ -159,7 +175,8 @@ fun AdminNavigationScreen() {
                     forResult = false
                 )
             }
-            scene(route = "/appointments") {
+            scene(route = "/appointments/null/{openId}") { navBackStackEntry ->
+                val openId = navBackStackEntry.path<Int>("openId")
                 val viewModel = koinViewModel<AppointmentsViewModel>()
                 val uiState = viewModel.uiState.collectAsState()
 
@@ -168,7 +185,7 @@ fun AdminNavigationScreen() {
                 })
 
                 LaunchedEffect(key1 = true, block = {
-                    viewModel.onUiEvent(AppointmentsUiEvent.FetchAppointmentsForAdmin)
+                    viewModel.onUiEvent(AppointmentsUiEvent.FetchAppointmentsForAdmin(openId))
                 })
 
                 AppointmentsScreen(
@@ -181,7 +198,8 @@ fun AdminNavigationScreen() {
                     appArgs = AppArgs.ADMIN
                 )
             }
-            scene(route = "/hospitalizations") {
+            scene(route = "/hospitalizations/null/{openId}") { navBackStackEntry ->
+                val openId = navBackStackEntry.path<Int>("openId")
                 val viewModel = koinViewModel<HospitalizationsViewModel>()
                 val uiState = viewModel.uiState.collectAsState()
 
@@ -190,10 +208,31 @@ fun AdminNavigationScreen() {
                 })
 
                 LaunchedEffect(key1 = true, block = {
-                    viewModel.onUiEvent(HospitalizationsUiEvent.FetchHospitalizationsForDoctorOrAdmin)
+                    viewModel.onUiEvent(HospitalizationsUiEvent.FetchHospitalizationsForDoctorOrAdmin(openId))
                 })
 
                 HospitalizationsScreen(
+                    navController = navController,
+                    uiState = uiState.value,
+                    onUiEvent = { event ->
+                        viewModel.onUiEvent(event)
+                    },
+                    appArgs = AppArgs.ADMIN
+                )
+            }
+            scene(route = "/payments") {
+                val viewModel = koinViewModel<PaymentsViewModel>()
+                val uiState = viewModel.uiState.collectAsState()
+
+                LaunchedEffect(key1 = uiState.value.isLoading, block = {
+                    isLoading = uiState.value.isLoading
+                })
+
+                LaunchedEffect(key1 = true, block = {
+                    viewModel.onUiEvent(PaymentsUiEvent.FetchPaymentsForDoctorOrAdmin)
+                })
+
+                PaymentsScreen(
                     navController = navController,
                     uiState = uiState.value,
                     onUiEvent = { event ->
@@ -268,7 +307,24 @@ fun AdminNavigationScreen() {
                 )
             }
             scene(route = "/statistics") {
+                val viewModel = koinViewModel<StatisticsViewModel>()
+                val uiState = viewModel.uiState.collectAsState()
 
+                LaunchedEffect(key1 = uiState.value.isLoading, block = {
+                    isLoading = uiState.value.isLoading
+                })
+
+                LaunchedEffect(key1 = true, block = {
+                    viewModel.onUiEvent(StatisticsUiEvent.FetchStatisticsForAdmin)
+                })
+
+                StatisticsScreen(
+                    navController = navController,
+                    uiState = uiState.value,
+                    onUiEvent = { event ->
+                        viewModel.onUiEvent(event)
+                    }
+                )
             }
             scene(route = "/info/patient/{userClientId}") { navBackStackEntry ->
                 val userClientId = navBackStackEntry.path<Int>("userClientId") ?: -1
@@ -316,5 +372,15 @@ fun AdminNavigationScreen() {
                 )
             }
         }
+    }
+
+    DirectoryPicker(
+        show = showDirPickerForExportData,
+        initialDirectory = "C:/",
+        title = "Choose folder to export data"
+    ) { path ->
+        showDirPickerForExportData = false
+
+        if (path != null) adminViewModel.exportData(path)
     }
 }

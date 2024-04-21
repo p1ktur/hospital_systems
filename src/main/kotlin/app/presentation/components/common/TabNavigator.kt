@@ -20,6 +20,7 @@ import moe.tlaster.precompose.navigation.*
 @Composable
 fun TabNavigator(
     navOptions: List<TabNavOption>,
+    menuOptions: List<MenuOption> = emptyList(),
     isLoading: Boolean = false,
     onLogOut: (() -> Unit)? = null,
     content: @Composable BoxScope.(NavController) -> Unit
@@ -46,8 +47,9 @@ fun TabNavigator(
     val currentEntry by navigator.currentEntry.collectAsState(null)
 
     var isMenuExpanded by remember { mutableStateOf(false) }
-    val menuOptions = remember {
-        val list = mutableStateListOf<MenuOption>()
+    val localMenuOptions = remember(menuOptions, onLogOut) {
+        val list = menuOptions.toMutableStateList()
+
         if (onLogOut != null) list.add(
             MenuOption(
                 text = "Log out",
@@ -127,7 +129,7 @@ fun TabNavigator(
                     }
                 }
             }
-            if (menuOptions.isNotEmpty()) {
+            if (localMenuOptions.isNotEmpty()) {
                 Icon(
                     modifier = Modifier
                         .size(48.dp)
@@ -166,7 +168,7 @@ fun TabNavigator(
                     tint = MaterialTheme.colorScheme.onBackground
                 )
             }
-            if (menuOptions.isNotEmpty()) {
+            if (localMenuOptions.isNotEmpty()) {
                 ExposedDropdownMenuBox(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
@@ -185,7 +187,7 @@ fun TabNavigator(
                             isMenuExpanded = false
                         }
                     ) {
-                        menuOptions.forEach { option ->
+                        localMenuOptions.forEach { option ->
                             DropdownMenuItem(
                                 onClick = {
                                     option.onClick()

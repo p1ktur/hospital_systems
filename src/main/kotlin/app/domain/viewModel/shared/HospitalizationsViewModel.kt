@@ -9,17 +9,15 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import moe.tlaster.precompose.viewmodel.*
 
-class HospitalizationsViewModel(
-    private val hospitalizationsRepository: HospitalizationsRepository
-) : ViewModel() {
+class HospitalizationsViewModel(private val hospitalizationsRepository: HospitalizationsRepository) : ViewModel() {
 
     private val _uiState: MutableStateFlow<HospitalizationsUiState> = MutableStateFlow(HospitalizationsUiState())
     val uiState = _uiState.asStateFlow()
 
     fun onUiEvent(event: HospitalizationsUiEvent) {
         when (event) {
-            HospitalizationsUiEvent.FetchHospitalizationsForDoctorOrAdmin -> fetchHospitalizationsForDoctorOrAdmin()
-            is HospitalizationsUiEvent.FetchHospitalizationsForClient -> fetchHospitalizationsForClient(event.userClientId)
+            is HospitalizationsUiEvent.FetchHospitalizationsForDoctorOrAdmin -> fetchHospitalizationsForDoctorOrAdmin(event.openId)
+            is HospitalizationsUiEvent.FetchHospitalizationsForClient -> fetchHospitalizationsForClient(event.userClientId, event.openId)
 
             is HospitalizationsUiEvent.StartCreatingHospitalization -> startCreatingHospitalization(event.userClientId, event.roomId)
             is HospitalizationsUiEvent.CreateHospitalization -> createHospitalization(event.reason, event.price)
@@ -34,7 +32,7 @@ class HospitalizationsViewModel(
         }
     }
 
-    private fun fetchHospitalizationsForDoctorOrAdmin() {
+    private fun fetchHospitalizationsForDoctorOrAdmin(openId: Int?) {
         if (uiState.value.isLoading) return
 
         _uiState.value = uiState.value.copy(
@@ -55,14 +53,15 @@ class HospitalizationsViewModel(
                         isLoading = false,
                         hospitalizations = data.hospitalizations,
                         payments = data.payments,
-                        errorCodes = emptyList()
+                        errorCodes = emptyList(),
+                        openId = openId
                     )
                 }
             }
         }
     }
 
-    private fun fetchHospitalizationsForClient(userClientId: Int) {
+    private fun fetchHospitalizationsForClient(userClientId: Int, openId: Int?) {
         if (uiState.value.isLoading) return
 
         _uiState.value = uiState.value.copy(
@@ -83,7 +82,8 @@ class HospitalizationsViewModel(
                         isLoading = false,
                         hospitalizations = data.hospitalizations,
                         payments = data.payments,
-                        errorCodes = emptyList()
+                        errorCodes = emptyList(),
+                        openId = openId
                     )
                 }
             }
@@ -129,7 +129,7 @@ class HospitalizationsViewModel(
                         creatingHospitalization = false
                     )
 
-                    fetchHospitalizationsForDoctorOrAdmin()
+                    fetchHospitalizationsForDoctorOrAdmin(null)
                 }
             }
         }
@@ -156,7 +156,7 @@ class HospitalizationsViewModel(
                         errorCodes = emptyList()
                     )
 
-                    fetchHospitalizationsForClient(userClientId)
+                    fetchHospitalizationsForClient(userClientId, null)
                 }
             }
         }
@@ -186,7 +186,7 @@ class HospitalizationsViewModel(
                             errorCodes = emptyList()
                         )
 
-                        fetchHospitalizationsForDoctorOrAdmin()
+                        fetchHospitalizationsForDoctorOrAdmin(null)
                     }
                 }
             } else {
@@ -221,7 +221,7 @@ class HospitalizationsViewModel(
                         errorCodes = emptyList()
                     )
 
-                    fetchHospitalizationsForDoctorOrAdmin()
+                    fetchHospitalizationsForDoctorOrAdmin(null)
                 }
             }
         }
@@ -250,7 +250,7 @@ class HospitalizationsViewModel(
                         errorCodes = emptyList()
                     )
 
-                    fetchHospitalizationsForDoctorOrAdmin()
+                    fetchHospitalizationsForDoctorOrAdmin(null)
                 }
             }
         }

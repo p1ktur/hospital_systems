@@ -19,12 +19,12 @@ class ClientInfoRepository(private val transactor: ITransactor) {
         val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm")
         val registrationDate = medCardResult.getTimestamp(1).toLocalDateTime().format(formatter)
 
-        val hospitalizationStatement = prepareStatement("SELECT end_date FROM hospitalization WHERE medical_card_id = ?")
+        val hospitalizationStatement = prepareStatement("SELECT COUNT(end_date) FROM hospitalization WHERE medical_card_id = ? AND end_date IS NULL")
         hospitalizationStatement.setInt(1, userClientResult.getInt(2))
         val hospitalizationResult = hospitalizationStatement.executeQuery()
 
         val isHospitalized = if (hospitalizationResult.next()) {
-            hospitalizationResult.getTimestamp(1).run { this != null }
+            hospitalizationResult.getInt(1).run { this > 0 }
         } else {
             false
         }
@@ -45,21 +45,55 @@ class ClientInfoRepository(private val transactor: ITransactor) {
         visitedAppointmentsResult.next()
         val visitedAppointments = visitedAppointmentsResult.getInt(1)
 
-        val pendingPaymentsStatement = prepareStatement("SELECT COUNT(*) FROM appointment " +
+        val pendingPaymentsStatementA = prepareStatement("SELECT COUNT(*) FROM appointment " +
                 "LEFT JOIN medical_card ON appointment.medical_card_id = medical_card.id " +
                 "LEFT JOIN appointment_result ON appointment.result_id = appointment_result.id " +
                 "LEFT JOIN payment ON appointment_result.payment_id = payment.id " +
                 "WHERE medical_card.id = ? AND payment.payed_amount IS NULL OR payment.payed_amount = 0")
+        pendingPaymentsStatementA.setInt(1, userClientResult.getInt(2))
+        val pendingPaymentsResultA = pendingPaymentsStatementA.executeQuery()
+        pendingPaymentsResultA.next()
+        val pendingPaymentsA = pendingPaymentsResultA.getInt(1)
+
+        val pendingPaymentsStatementH = prepareStatement("SELECT COUNT(*) FROM hospitalization " +
+                "LEFT JOIN medical_card ON hospitalization.medical_card_id = medical_card.id " +
+                "LEFT JOIN payment ON hospitalization.payment_id = payment.id " +
+                "WHERE medical_card.id = ? AND payment.payed_amount IS NULL OR payment.payed_amount = 0")
+        pendingPaymentsStatementH.setInt(1, userClientResult.getInt(2))
+        val pendingPaymentsResultH = pendingPaymentsStatementH.executeQuery()
+        pendingPaymentsResultH.next()
+        val pendingPaymentsH = pendingPaymentsResultH.getInt(1)
+
+        val pendingPaymentsStatement = prepareStatement("SELECT COUNT(*) FROM sub_payment " +
+                "LEFT JOIN medical_card ON sub_payment.medical_card_id = medical_card.id " +
+                "WHERE medical_card.id = ? AND payed_amount IS NULL OR payed_amount = 0")
         pendingPaymentsStatement.setInt(1, userClientResult.getInt(2))
-        val pendingPaymentsResult = pendingAppointmentsStatement.executeQuery()
+        val pendingPaymentsResult = pendingPaymentsStatement.executeQuery()
         pendingPaymentsResult.next()
         val pendingPayments = pendingPaymentsResult.getInt(1)
 
-        val payedPaymentsStatement = prepareStatement("SELECT COUNT(*) FROM appointment " +
+        val payedPaymentsStatementA = prepareStatement("SELECT COUNT(*) FROM appointment " +
                 "LEFT JOIN medical_card ON appointment.medical_card_id = medical_card.id " +
                 "LEFT JOIN appointment_result ON appointment.result_id = appointment_result.id " +
                 "LEFT JOIN payment ON appointment_result.payment_id = payment.id " +
                 "WHERE medical_card.id = ? AND payment.payed_amount IS NOT NULL AND payment.payed_amount > 0")
+        payedPaymentsStatementA.setInt(1, userClientResult.getInt(2))
+        val payedPaymentsResultA = payedPaymentsStatementA.executeQuery()
+        payedPaymentsResultA.next()
+        val payedPaymentsA = payedPaymentsResultA.getInt(1)
+
+        val payedPaymentsStatementH = prepareStatement("SELECT COUNT(*) FROM hospitalization " +
+                "LEFT JOIN medical_card ON hospitalization.medical_card_id = medical_card.id " +
+                "LEFT JOIN payment ON hospitalization.payment_id = payment.id " +
+                "WHERE medical_card.id = ? AND payment.payed_amount IS NOT NULL AND payment.payed_amount > 0")
+        payedPaymentsStatementH.setInt(1, userClientResult.getInt(2))
+        val payedPaymentsResultH = payedPaymentsStatementH.executeQuery()
+        payedPaymentsResultH.next()
+        val payedPaymentsH = payedPaymentsResultH.getInt(1)
+
+        val payedPaymentsStatement = prepareStatement("SELECT COUNT(*) FROM sub_payment " +
+                "LEFT JOIN medical_card ON sub_payment.medical_card_id = medical_card.id " +
+                "WHERE medical_card.id = ? AND payed_amount IS NOT NULL AND payed_amount > 0")
         payedPaymentsStatement.setInt(1, userClientResult.getInt(2))
         val payedPaymentsResult = payedPaymentsStatement.executeQuery()
         payedPaymentsResult.next()
@@ -84,8 +118,8 @@ class ClientInfoRepository(private val transactor: ITransactor) {
             pendingAppointments = pendingAppointments,
             visitedAppointments = visitedAppointments,
             isHospitalized = isHospitalized,
-            pendingPayments = pendingPayments,
-            payedPayments = payedPayments
+            pendingPayments = pendingPaymentsA + pendingPaymentsH + pendingPayments,
+            payedPayments = payedPaymentsA + payedPaymentsH + payedPayments
         )
         TransactorResult.Success(clientInfoData)
     }

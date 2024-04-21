@@ -46,6 +46,9 @@ dependencies {
 
     // CSV
     implementation("com.opencsv:opencsv:5.3")
+
+    // File picker
+    implementation("com.darkrockstudios:mpfilepicker:3.1.0")
 }
 
 compose.desktop {

@@ -2,9 +2,11 @@ package app.presentation.components.hospitalizations
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.draw.*
 import androidx.compose.ui.unit.*
 import app.domain.model.shared.hospitalization.*
 import app.domain.model.shared.payment.*
@@ -12,15 +14,24 @@ import app.domain.util.args.*
 
 @Composable
 fun HospitalizationView(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     hospitalization: Hospitalization,
-    payment: Payment?,
+    payment: Payment.Default?,
     appArgs: AppArgs,
+    isSelected: Boolean,
     onClick: (() -> Unit)? = null,
     onClientNameClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8))
+            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(8))
+            .border(
+                2.dp,
+                if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                RoundedCornerShape(8)
+            )
             .clickable(
                 onClick = {
                     onClick?.invoke()
