@@ -3,6 +3,7 @@ package app.data.doctor
 import app.domain.database.transactor.*
 import app.domain.model.doctor.*
 import app.domain.model.shared.room.*
+import java.time.format.*
 
 class DoctorInfoRepository(private val transactor: ITransactor) {
 
@@ -23,7 +24,7 @@ class DoctorInfoRepository(private val transactor: ITransactor) {
         finishedAppointmentsResult.next()
         val finishedAppointments = finishedAppointmentsResult.getInt(1)
 
-        val doctorInfoStatement = prepareStatement("SELECT name, surname, fathers_name, age, address, phone, email, position, salary, room_id FROM worker " +
+        val doctorInfoStatement = prepareStatement("SELECT name, surname, fathers_name, age, address, phone, email, position, salary, room_id, creation_date FROM worker " +
                 "WHERE worker.id = ?")
         doctorInfoStatement.setInt(1, userWorkerResult.getInt(2))
         val doctorInfoResult = doctorInfoStatement.executeQuery()
@@ -52,6 +53,8 @@ class DoctorInfoRepository(private val transactor: ITransactor) {
             )
         }
 
+        val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm")
+
         val doctorInfoData = DoctorInfoData(
             name = doctorInfoResult.getString(1),
             surname = doctorInfoResult.getString(2),
@@ -62,6 +65,7 @@ class DoctorInfoRepository(private val transactor: ITransactor) {
             email = doctorInfoResult.getString(7),
             position = doctorInfoResult.getString(8),
             salary = doctorInfoResult.getFloat(9),
+            registrationDate = doctorInfoResult.getTimestamp(11).toLocalDateTime().format(formatter),
             designationName = if (isThereADesignation) designationResult.getString(1) else "",
             designationFloor = if (isThereADesignation) designationResult.getInt(2) else 0,
             designationNumber = if (isThereADesignation) designationResult.getInt(3) else 0,

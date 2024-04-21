@@ -22,6 +22,7 @@ fun TabNavigator(
     navOptions: List<TabNavOption>,
     menuOptions: List<MenuOption> = emptyList(),
     isLoading: Boolean = false,
+    navigationAllowed: Boolean = true,
     onLogOut: (() -> Unit)? = null,
     content: @Composable BoxScope.(NavController) -> Unit
 ) {
@@ -47,16 +48,16 @@ fun TabNavigator(
     val currentEntry by navigator.currentEntry.collectAsState(null)
 
     var isMenuExpanded by remember { mutableStateOf(false) }
-    val localMenuOptions = remember(menuOptions, onLogOut) {
-        val list = menuOptions.toMutableStateList()
+    val localMenuOptions = remember(menuOptions, onLogOut, currentEntry) {
+        val list = menuOptions.filter { !it.showOnlyOnWelcomeScreen || (currentEntry?.route?.route == "/welcome") }.toMutableStateList()
 
         if (onLogOut != null) list.add(
             MenuOption(
                 text = "Log out",
                 onClick = {
                     onLogOut.invoke()
-
                     navController.clearBackStack()
+
                     if (navigationRouteStack.size > 1) navigationRouteStack.removeRange(1, navigationRouteStack.size)
                 }
             )
@@ -96,7 +97,7 @@ fun TabNavigator(
                     Text(
                         modifier = Modifier
                             .clickable(onClick = {
-                                if (!navController.compareRoutes(currentRoute, tabNavOption.route)) {
+                                if (navigationAllowed && !navController.compareRoutes(currentRoute, tabNavOption.route)) {
                                     currentRoute = tabNavOption.route
                                     navController.navigate(tabNavOption.route)
                                 }
@@ -190,8 +191,10 @@ fun TabNavigator(
                         localMenuOptions.forEach { option ->
                             DropdownMenuItem(
                                 onClick = {
-                                    option.onClick()
-                                    isMenuExpanded = false
+                                    if (navigationAllowed) {
+                                        option.onClick()
+                                        isMenuExpanded = false
+                                    }
                                 }
                             ) {
                                 Text(

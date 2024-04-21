@@ -45,7 +45,7 @@ data class SalaryStatistics(
                         (it / totalMoneyStatistics.perDay[index].toFloat()).roundToInt()
                     }
                 },
-                title = "Salary"
+                title = "Salary per total income"
             ),
             ChartTimeData.Week(
                 data = perWeek.mapIndexed { index, it ->
@@ -55,7 +55,7 @@ data class SalaryStatistics(
                         (it / totalMoneyStatistics.perWeek[index].toFloat()).roundToInt()
                     }
                 },
-                title = "Salary"
+                title = "Salary per total income"
             ),
             ChartTimeData.Month(
                 data = perMonth.mapIndexed { index, it ->
@@ -65,7 +65,7 @@ data class SalaryStatistics(
                         (it / totalMoneyStatistics.perMonth[index].toFloat()).roundToInt()
                     }
                 },
-                title = "Salary"
+                title = "Salary per total income"
             ),
             ChartTimeData.Year(
                 data = perYear.mapIndexed { index, it ->
@@ -75,7 +75,7 @@ data class SalaryStatistics(
                         (it / totalMoneyStatistics.perYear[index].toFloat()).roundToInt()
                     }
                 },
-                title = "Salary"
+                title = "Salary per total income"
             )
         )
     }

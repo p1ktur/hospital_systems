@@ -488,38 +488,46 @@ fun StatisticsScreen(
                             color = MaterialTheme.colorScheme.onBackground,
                             thickness = 1.dp
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        DataChart(
-                            modifier = Modifier
-                                .height(500.dp)
-                                .aspectRatio(10f / 6f),
-                            chartTimeData = uiState.registrationStatistics.workersToChartTimeData(),
-                            chartSettings = defaultChartSettings().copy(yTitle = "Amount")
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Divider(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(1.dp),
-                            color = MaterialTheme.colorScheme.onBackground,
-                            thickness = 1.dp
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        DataChart(
-                            modifier = Modifier
-                                .height(500.dp)
-                                .aspectRatio(10f / 6f),
-                            chartTimeData = uiState.registrationStatistics.clientsToChartTimeData(),
-                            chartSettings = defaultChartSettings().copy(yTitle = "Amount")
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Divider(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(1.dp),
-                            color = MaterialTheme.colorScheme.onBackground,
-                            thickness = 1.dp
-                        )
+                        if (uiState.registrationStatistics.containsData()) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            DataChart(
+                                modifier = Modifier
+                                    .height(500.dp)
+                                    .aspectRatio(10f / 6f),
+                                chartTimeData = uiState.registrationStatistics.workersToChartTimeData(),
+                                chartSettings = defaultChartSettings().copy(yTitle = "Amount")
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Divider(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(1.dp),
+                                color = MaterialTheme.colorScheme.onBackground,
+                                thickness = 1.dp
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            DataChart(
+                                modifier = Modifier
+                                    .height(500.dp)
+                                    .aspectRatio(10f / 6f),
+                                chartTimeData = uiState.registrationStatistics.clientsToChartTimeData(),
+                                chartSettings = defaultChartSettings().copy(yTitle = "Amount")
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Divider(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(1.dp),
+                                color = MaterialTheme.colorScheme.onBackground,
+                                thickness = 1.dp
+                            )
+                        } else {
+                            Text(
+                                text = "No data for registrations",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "Best doctors by rating",
@@ -575,6 +583,9 @@ fun StatisticsScreen(
                                 )
                             }
                         }
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(32.dp))
                     }
                 }
             }

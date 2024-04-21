@@ -11,6 +11,7 @@ import androidx.compose.ui.window.*
 import app.presentation.components.common.*
 import app.presentation.components.window.*
 import app.presentation.theme.*
+import java.time.LocalDateTime
 import java.util.*
 
 @Composable
@@ -18,7 +19,7 @@ fun DateTimePickerDialog(
     title: String? = null,
     visible: Boolean,
     onClose: () -> Unit,
-    onDateTimePicked: (Date) -> Unit
+    onDateTimePicked: (LocalDateTime) -> Unit
 ) {
     val dialogState = rememberDialogState(size = DpSize(500.dp, 320.dp))
 
@@ -212,14 +213,7 @@ fun DateTimePickerDialog(
                     Button(
                         modifier = Modifier.width(160.dp),
                         onClick = {
-                            val calendar = Calendar.getInstance()
-                            calendar.set(Calendar.YEAR, selectedYear)
-                            calendar.set(Calendar.MONTH, selectedMonth)
-                            calendar.set(Calendar.DAY_OF_MONTH, selectedDay)
-                            calendar.set(Calendar.HOUR_OF_DAY, selectedHour)
-                            calendar.set(Calendar.MINUTE, selectedMinute)
-
-                            onDateTimePicked(calendar.time)
+                            onDateTimePicked(LocalDateTime.of(selectedYear, selectedMonth, selectedDay, selectedHour, selectedMinute))
                         },
                         colors = buttonColors()
                     ) {

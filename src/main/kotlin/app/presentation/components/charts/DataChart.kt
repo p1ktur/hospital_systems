@@ -18,6 +18,8 @@ import app.domain.model.shared.charts.*
 import app.domain.theme.*
 import app.domain.util.time.*
 import app.presentation.theme.*
+import java.time.*
+import java.time.format.DateTimeFormatter
 import kotlin.math.*
 import kotlin.random.*
 
@@ -87,7 +89,7 @@ fun DataChart(
                     )
                     drawDataOnChart(
                         textMeasurer = textMeasurer,
-                        data = chosenChartTimeData.data,
+                        chartTimeData = chosenChartTimeData,
                         chartSettings = chartSettings
                     )
                 }
@@ -196,10 +198,11 @@ fun DrawScope.drawChartBackground(chartSettings: ChartSettings) {
 }
 
 fun DrawScope.drawDataOnChart(
-    data: List<Int>,
+    chartTimeData: ChartTimeData,
     textMeasurer: TextMeasurer,
     chartSettings: ChartSettings
 ) {
+    val data = chartTimeData.data
     val min = if (data.any { it < 0 }) {
         data.minOrNull() ?: return
     } else {
@@ -216,6 +219,11 @@ fun DrawScope.drawDataOnChart(
 
     for (index in min..max) {
         val entryHeight = index.toFloat() - min
+        val entry = if (height == 0) {
+            max
+        } else {
+            (entryHeight / height * max).roundToInt()
+        }
 
         if (!drawnLines.contains(entryHeight) && entryHeight.roundToInt() % step == 0) {
             val point = Offset(
@@ -229,6 +237,26 @@ fun DrawScope.drawDataOnChart(
                 end = point.copy(x = size.width),
                 strokeWidth = 0.5f
             )
+
+            if (!drawnLines.contains(entryHeight)) drawnLines.add(entryHeight)
+
+            if (!drawnTexts.contains(entry)) {
+                val textLayoutResult = textMeasurer.measure(
+                    text = entry.toString(),
+                    style = chartSettings.dataTextStyle.copy(textAlign = TextAlign.End)
+                )
+                val textPoint = point.copy(x = size.width * 0.025f)
+                drawText(
+                    textLayoutResult = textLayoutResult,
+                    topLeft = textPoint.copy(
+                        x = textPoint.x - textLayoutResult.size.width / 2,
+                        y = textPoint.y - textLayoutResult.size.height / 2
+                    ),
+                    color = chartSettings.textColor
+                )
+                drawnTexts.add(entry)
+            }
+
             drawnLines.add(entryHeight)
         }
     }
@@ -245,40 +273,11 @@ fun DrawScope.drawDataOnChart(
             end = point.copy(x = size.width),
             strokeWidth = 0.5f
         )
-    }
 
-    drawnLines.clear()
-
-    data.forEachIndexed { index, entry ->
-        val entryHeight = min - entry.toFloat()
-        val entryWidth = index.toFloat()
-
-        val point = Offset(
-            x = size.width * 0.075f + entryWidth / width * size.width * 0.9f,
-            y = size.height * 0.925f + entryHeight / height * size.height * 0.9f
-        )
-
-        drawRect(
-            color = chartSettings.dataColor,
-            topLeft = point.copy(x = point.x),
-            size = Size(width = 1f / width * size.width * 0.9f, height = size.height * 0.95f - point.y)
-        )
-        drawRect(
-            color = Color.Black,
-            topLeft = point.copy(x = point.x),
-            size = Size(width = 1f / width * size.width * 0.9f, height = size.height * 0.95f - point.y),
-            style = Stroke(0.5f)
-        )
-
-        if (!drawnLines.contains(entryHeight)) drawnLines.add(entryHeight)
-
-        if (!drawnTexts.contains(entry)) {
+        if (!drawnTexts.contains(max)) {
             val textLayoutResult = textMeasurer.measure(
-                text = entry.toString(),
-                style = TextStyle.Default.copy(
-                    fontSize = 8.sp,
-                    textAlign = TextAlign.End
-                )
+                text = max.toString(),
+                style = chartSettings.dataTextStyle.copy(textAlign = TextAlign.End)
             )
             val textPoint = point.copy(x = size.width * 0.025f)
             drawText(
@@ -289,16 +288,60 @@ fun DrawScope.drawDataOnChart(
                 ),
                 color = chartSettings.textColor
             )
-            drawnTexts.add(entry)
+        }
+    }
+
+    data.forEachIndexed { index, entry ->
+        val entryHeight = min - entry.toFloat()
+        val entryWidth = index.toFloat()
+
+        val point = Offset(
+            x = size.width * 0.075f + entryWidth / width * size.width * 0.9f,
+            y = size.height * 0.925f + entryHeight / height * size.height * 0.9f
+        )
+
+        val rectHeight = size.height * 0.95f - point.y
+
+        drawRect(
+            color = chartSettings.dataColor,
+            topLeft = point.copy(x = point.x),
+            size = Size(width = 1f / width * size.width * 0.9f, height = rectHeight)
+        )
+        drawRect(
+            color = Color.Black,
+            topLeft = point.copy(x = point.x),
+            size = Size(width = 1f / width * size.width * 0.9f, height = rectHeight),
+            style = Stroke(0.5f)
+        )
+
+        val reverseIndex = data.size - index
+        val now = LocalDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+        val columnText = when (chartTimeData) {
+            is ChartTimeData.Hour -> "TODO"
+            is ChartTimeData.Day -> {
+                now.minusDays(reverseIndex - 1L).dayOfMonth.toString()
+            }
+            is ChartTimeData.Week -> when (reverseIndex) {
+                1 -> "This"
+                2 -> "Last"
+                else -> reverseIndex.toString()
+            }
+            is ChartTimeData.Month -> when (reverseIndex) {
+                1 -> "This"
+                2 -> "Last"
+                else -> reverseIndex.toString()
+            }
+            is ChartTimeData.Year -> {
+                "Current year: ${now.minusYears(1).format(formatter)} - ${now.format(formatter)}"
+            }
         }
 
-        val textLayoutResult = textMeasurer.measure(
-            text = index.toString(),
-            style = TextStyle.Default.copy(
-                fontSize = 8.sp
-            )
+        var textLayoutResult = textMeasurer.measure(
+            text = columnText,
+            style = chartSettings.dataTextStyle
         )
-        val textPoint = point.copy(x = point.x + 0.5f / width * size.width * 0.9f, y = size.height * 0.975f)
+        var textPoint = point.copy(x = point.x + 0.5f / width * size.width * 0.9f, y = size.height * 0.975f)
         drawText(
             textLayoutResult = textLayoutResult,
             topLeft = textPoint.copy(
@@ -307,5 +350,27 @@ fun DrawScope.drawDataOnChart(
             ),
             color = chartSettings.textColor
         )
+
+        if (entry != 0) {
+            textLayoutResult = textMeasurer.measure(
+                text = entry.toString(),
+                style = chartSettings.dataTextStyle
+            )
+            textPoint = point.copy(x = point.x + 0.5f / width * size.width * 0.9f, y = size.height * 0.94f)
+            rotate(-90f, textPoint) {
+                drawText(
+                    textLayoutResult = textLayoutResult,
+                    topLeft = textPoint.copy(
+                        x = if (rectHeight * 0.9f > textLayoutResult.size.width) {
+                            textPoint.x
+                        } else {
+                            textPoint.x + rectHeight
+                        },
+                        y = textPoint.y - textLayoutResult.size.height / 2
+                    ),
+                    color = if (rectHeight > textLayoutResult.size.width) Color.Black else chartSettings.textColor
+                )
+            }
+        }
     }
 }

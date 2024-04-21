@@ -8,6 +8,7 @@ import androidx.compose.ui.text.*
 data class ChartSettings(
     var yTitle: String,
     var titleStyle: TextStyle,
+    var dataTextStyle: TextStyle,
     var backgroundColor: Color,
     var linesColor: Color,
     var textColor: Color,
@@ -21,6 +22,7 @@ fun defaultChartSettings(): ChartSettings {
         titleStyle = MaterialTheme.typography.bodyLarge,
         backgroundColor = MaterialTheme.colorScheme.primaryContainer,
         linesColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        textColor = MaterialTheme.colorScheme.onBackground
+        textColor = MaterialTheme.colorScheme.onBackground,
+        dataTextStyle = MaterialTheme.typography.bodySmall
     )
 }

@@ -12,6 +12,7 @@ data class DoctorInfoData(
     val email: String = "",
     val position: String = "",
     val salary: Float = 0f,
+    val registrationDate: String = "",
     val designationName: String = "",
     val designationFloor: Int = 0,
     val designationNumber: Int = 0,

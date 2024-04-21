@@ -46,7 +46,7 @@ fun main(vararg args: String) {
         if (args.asList().contains("init_db")) {
             val databaseInitializer = koinInject<DatabaseInitializer>()
             coroutineScope.launch(Dispatchers.IO) {
-                databaseInitializer.initDatabaseWithData()
+                databaseInitializer.initializeDatabaseWithResetOnFailure()
             }
             return@application
         }

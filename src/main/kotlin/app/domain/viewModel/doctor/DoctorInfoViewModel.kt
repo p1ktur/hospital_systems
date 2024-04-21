@@ -69,6 +69,7 @@ class DoctorInfoViewModel(
                         email = data.email,
                         position = data.position,
                         salary = data.salary.toString(),
+                        registrationDate = data.registrationDate,
                         designationName = data.designationName,
                         designationFloor = data.designationFloor.toString(),
                         designationNumber = data.designationNumber.toString(),

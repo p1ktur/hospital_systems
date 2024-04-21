@@ -8,6 +8,8 @@ import app.domain.uiState.shared.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import moe.tlaster.precompose.viewmodel.*
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 class AppointmentsViewModel(private val appointmentsRepository: AppointmentsRepository) : ViewModel() {
@@ -21,7 +23,7 @@ class AppointmentsViewModel(private val appointmentsRepository: AppointmentsRepo
             is AppointmentsUiEvent.FetchAppointmentsForDoctor -> fetchAppointmentsForDoctor(event.userWorkerId, event.openId)
             is AppointmentsUiEvent.FetchAppointmentsForClient -> fetchAppointmentsForClient(event.userClientId, event.openId)
 
-            is AppointmentsUiEvent.CreateAppointment -> createAppointment(event.selfUserWorkerId, event.userWorkerId, event.userClientId, event.date)
+            is AppointmentsUiEvent.CreateAppointment -> createAppointment(event.selfUserWorkerId, event.userWorkerId, event.userClientId, event.localDateTime)
             is AppointmentsUiEvent.CreateAppointmentResult -> createAppointmentResult(event.userWorkerId, event.appointmentId, event.price, event.notes)
             is AppointmentsUiEvent.PayForAppointment -> payForAppointment(event.userClientId, event.appointmentResultId, event.payedAmount, event.payedAccount)
             is AppointmentsUiEvent.DeleteAppointment -> deleteAppointment(event.userWorkerId, event.appointmentId)
@@ -126,7 +128,7 @@ class AppointmentsViewModel(private val appointmentsRepository: AppointmentsRepo
         }
     }
 
-    private fun createAppointment(selfUserWorkerId: Int, userWorkerId: Int, userClientId: Int, date: Date) {
+    private fun createAppointment(selfUserWorkerId: Int, userWorkerId: Int, userClientId: Int, localDateTime: LocalDateTime) {
         if (uiState.value.isLoading) return
 
         _uiState.value = uiState.value.copy(
@@ -134,7 +136,7 @@ class AppointmentsViewModel(private val appointmentsRepository: AppointmentsRepo
         )
 
         viewModelScope.launch(Dispatchers.IO) {
-            when (appointmentsRepository.createAppointment(userWorkerId, userClientId, date)) {
+            when (appointmentsRepository.createAppointment(userWorkerId, userClientId, localDateTime)) {
                 is TransactorResult.Failure -> {
                     _uiState.value = uiState.value.copy(
                         isLoading = false,

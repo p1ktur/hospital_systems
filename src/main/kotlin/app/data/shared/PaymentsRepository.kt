@@ -25,7 +25,7 @@ class PaymentsRepository(private val transactor: ITransactor) {
                 "INNER JOIN public.user ON user_client.user_id = public.user.id")
         val paymentsResultH = paymentsStatementH.executeQuery()
 
-        val formatter = DateTimeFormatter.ofPattern("HH:mm")
+        val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm")
         val payments = mutableListOf<Payment.Default>()
 
         while (paymentsResultA.next()) payments.add(
@@ -33,7 +33,7 @@ class PaymentsRepository(private val transactor: ITransactor) {
                 id = paymentsResultA.getInt(1),
                 payedAmount = paymentsResultA.getFloat(2),
                 payedAccount = paymentsResultA.getString(3),
-                time = paymentsResultA.getTime(4).toLocalTime().format(formatter),
+                time = paymentsResultA.getTimestamp(4).toLocalDateTime().format(formatter),
                 clientName = paymentsResultA.getString(5),
                 clientLogin = paymentsResultA.getString(6),
                 userClientId = paymentsResultA.getInt(7),
@@ -47,7 +47,7 @@ class PaymentsRepository(private val transactor: ITransactor) {
                 id = paymentsResultH.getInt(1),
                 payedAmount = paymentsResultH.getFloat(2),
                 payedAccount = paymentsResultH.getString(3),
-                time = paymentsResultH.getTime(4).toLocalTime().format(formatter),
+                time = paymentsResultH.getTimestamp(4).toLocalDateTime().format(formatter),
                 clientName = paymentsResultH.getString(5),
                 clientLogin = paymentsResultH.getString(6),
                 userClientId = paymentsResultH.getInt(7),
@@ -70,7 +70,7 @@ class PaymentsRepository(private val transactor: ITransactor) {
                     id = subPaymentsResult.getInt(1),
                     payedAmount = subPaymentsResult.getFloat(2),
                     payedAccount = subPaymentsResult.getString(3) ?: "",
-                    time = subPaymentsResult.getTime(4)?.toLocalTime()?.format(formatter) ?: "",
+                    time = subPaymentsResult.getTimestamp(4)?.toLocalDateTime()?.format(formatter) ?: "",
                     clientName = subPaymentsResult.getString(8),
                     clientLogin = subPaymentsResult.getString(9),
                     userClientId = subPaymentsResult.getInt(10),
@@ -114,7 +114,7 @@ class PaymentsRepository(private val transactor: ITransactor) {
         paymentsStatementH.setInt(1, medCardId)
         val paymentsResultH = paymentsStatementH.executeQuery()
 
-        val formatter = DateTimeFormatter.ofPattern("HH:mm")
+        val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm")
         val payments = mutableListOf<Payment.Default>()
 
         while (paymentsResultA.next()) payments.add(
@@ -122,7 +122,7 @@ class PaymentsRepository(private val transactor: ITransactor) {
                 id = paymentsResultA.getInt(1),
                 payedAmount = paymentsResultA.getFloat(2),
                 payedAccount = paymentsResultA.getString(3),
-                time = paymentsResultA.getTime(4).toLocalTime().format(formatter),
+                time = paymentsResultA.getTimestamp(4).toLocalDateTime().format(formatter),
                 clientName = clientName,
                 clientLogin = clientLogin,
                 userClientId = userClientId,
@@ -136,7 +136,7 @@ class PaymentsRepository(private val transactor: ITransactor) {
                 id = paymentsResultH.getInt(1),
                 payedAmount = paymentsResultH.getFloat(2),
                 payedAccount = paymentsResultH.getString(3),
-                time = paymentsResultH.getTime(4).toLocalTime().format(formatter),
+                time = paymentsResultH.getTimestamp(4).toLocalDateTime().format(formatter),
                 clientName = clientName,
                 clientLogin = clientLogin,
                 userClientId = userClientId,
@@ -156,7 +156,7 @@ class PaymentsRepository(private val transactor: ITransactor) {
                     id = subPaymentsResult.getInt(1),
                     payedAmount = subPaymentsResult.getFloat(2),
                     payedAccount = subPaymentsResult.getString(3) ?: "",
-                    time = subPaymentsResult.getTime(4)?.toLocalTime()?.format(formatter) ?: "",
+                    time = subPaymentsResult.getTimestamp(4)?.toLocalDateTime()?.format(formatter) ?: "",
                     clientName = clientName,
                     clientLogin = clientLogin,
                     userClientId = userClientId,

@@ -16,7 +16,7 @@ val sharedModule = module {
     }
 
     single { Vocabulary() }
-    single { DatabaseInitializer(get(), get()) }
+    single { DatabaseInitializer(get(), get(), get(), get(), get(), get(), get()) }
     single { DatabaseDataExporter(get()) }
 
     single { AppointmentsRepository(get()) }
@@ -27,7 +27,7 @@ val sharedModule = module {
     single { PaymentsRepository(get()) }
     single { StatisticsRepository(get()) }
 
-    single { AdminViewModel(get()) }
+    single { AdminViewModel(get(), get()) }
     factory { AppointmentsViewModel(get()) }
     factory { HospitalizationsViewModel(get()) }
     factory { RoomsViewModel(get()) }

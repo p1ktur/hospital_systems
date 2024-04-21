@@ -13,6 +13,7 @@ data class DoctorInfoUiState(
     val email: String = "",
     val position: String = "",
     val salary: String = "0",
+    val registrationDate: String = "",
     val designationName: String = "",
     val designationFloor: String = "0",
     val designationNumber: String = "0",

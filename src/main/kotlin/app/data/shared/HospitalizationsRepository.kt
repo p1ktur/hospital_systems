@@ -39,13 +39,13 @@ class HospitalizationsRepository(private val transactor: ITransactor) {
         val paymentsResult = paymentsStatement.executeQuery()
 
         val payments = buildList {
-            val formatter = DateTimeFormatter.ofPattern("HH:mm")
+            val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm")
             while (paymentsResult.next()) add(
                 Payment.Default(
                     id = paymentsResult.getInt(1),
                     payedAmount = paymentsResult.getFloat(2),
                     payedAccount = paymentsResult.getString(3),
-                    time = paymentsResult.getTime(4).toLocalTime().format(formatter),
+                    time = paymentsResult.getTimestamp(4).toLocalDateTime().format(formatter),
                     helpIdType = 1,
                     helpId = -1,
                     clientName = "",
@@ -106,13 +106,13 @@ class HospitalizationsRepository(private val transactor: ITransactor) {
         val paymentsResult = paymentsStatement.executeQuery()
 
         val payments = buildList {
-            val formatter = DateTimeFormatter.ofPattern("HH:mm")
+            val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm")
             while (paymentsResult.next()) add(
                 Payment.Default(
                     id = paymentsResult.getInt(1),
                     payedAmount = paymentsResult.getFloat(2),
                     payedAccount = paymentsResult.getString(3),
-                    time = paymentsResult.getTime(4).toLocalTime().format(formatter),
+                    time = paymentsResult.getTimestamp(4).toLocalDateTime().format(formatter),
                     helpIdType = 1,
                     helpId = -1,
                     clientName = clientName,

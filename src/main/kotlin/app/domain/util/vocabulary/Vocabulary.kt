@@ -2,6 +2,16 @@ package app.domain.util.vocabulary
 
 class Vocabulary {
 
+    val daysOfWeek = arrayOf(
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+    )
+
     val doctorPositions = arrayOf(
         "Family Doctor" to "Family Doctor's",
         "Surgeon" to "Surgery",
@@ -58,5 +68,222 @@ class Vocabulary {
         "Surgical Lights",
         "Wheelchair",
         "Crutches "
+    )
+
+    val names = arrayOf(
+        "Oleksandr",
+        "Ivan",
+        "Olha",
+        "Maria",
+        "Volodymyr",
+        "Liudmyla",
+        "Petro",
+        "Hanna",
+        "Yuri",
+        "Nataliia",
+        "Oleksandr",
+        "Yuliya",
+        "Ihor",
+        "Kateryna",
+        "Pavlo",
+        "Olena",
+        "Serhiy",
+        "Nataliya",
+        "Mykola",
+        "Anastasiia"
+    )
+
+    val surnames = arrayOf(
+        "Ivanenko",
+        "Petrenko",
+        "Kovalchuk",
+        "Shevchenko",
+        "Bondarenko",
+        "Tkachenko",
+        "Kovalov",
+        "Romanenko",
+        "Symonenko",
+        "Shukhevich",
+        "Volkov",
+        "Ponomarenko",
+        "Melnyk",
+        "Zaytsev",
+        "Sydorenko",
+        "Holubov",
+        "Fedorenko",
+        "Sidorov",
+        "Hrytsenko",
+        "Onyshchenko"
+    )
+
+    val fatherNames = arrayOf(
+        "Ivanovych",
+        "Petrovych",
+        "Oleksiyovych",
+        "Mykhaylovych",
+        "Serhiyovych",
+        "Andriyovych",
+        "Volodymyrovych",
+        "Pavlovych",
+        "Dmytrovych",
+        "Olexandrovych"
+    )
+
+    val nicknames = arrayOf(
+        "Sparky",
+        "Shadow",
+        "Luna",
+        "Maverick",
+        "Blitz",
+        "Phoenix",
+        "Whisper",
+        "Bandit",
+        "Tiger",
+        "Siren"
+    )
+
+    val addresses = arrayOf(
+        "10 Green Street, Kyiv, Ukraine",
+        "25 Maple Avenue, Lviv, Ukraine",
+        "7 Sunny Lane, Kharkiv, Ukraine",
+        "15 River Road, Odesa, Ukraine",
+        "3 Forest Drive, Dnipro, Ukraine",
+        "8 Mountain View, Zaporizhzhia, Ukraine",
+        "12 Sunset Boulevard, Vinnytsia, Ukraine",
+        "6 Ocean Drive, Ivano-Frankivsk, Ukraine",
+        "21 Rose Garden, Chernivtsi, Ukraine",
+        "4 Park Avenue, Rivne, Ukraine",
+        "18 Meadow Lane, Ternopil, Ukraine",
+        "9 Birch Street, Lutsk, Ukraine",
+        "5 Pine Grove, Kherson, Ukraine",
+        "14 Ivy Court, Sumy, Ukraine",
+        "22 Sunrise Avenue, Poltava, Ukraine",
+        "11 Lakeview Drive, Mukachevo, Ukraine",
+        "17 Hillcrest Road, Kropyvnytskyi, Ukraine",
+        "23 Oakwood Place, Uzhhorod, Ukraine",
+        "6 Willow Way, Mykolaiv, Ukraine",
+        "20 Cedar Street, Berdyansk, Ukraine"
+    )
+
+    val phones = arrayOf(
+        "+380501234567",
+        "+380671098765",
+        "+380931234567",
+        "+380441234567",
+        "+380501234567",
+        "+380681234567",
+        "+380931234567",
+        "+380441098765",
+        "+380661234567",
+        "+380931098765",
+        "+380441234567",
+        "+380671098765",
+        "+380931234567",
+        "+380441234567",
+        "+380681098765",
+        "+380501234567",
+        "+380661234567",
+        "+380931234567",
+        "+380441098765",
+        "+380681234567"
+    )
+
+    val notes = arrayOf(
+        "Remember to buy milk.",
+        "Call mom after work.",
+        "Finish report by Friday.",
+        "Don\'t forget to water the plants.",
+        "Schedule a dentist appointment.",
+        "Start reading that new book tonight.",
+        "Pick up dry cleaning tomorrow.",
+        "Check in with John about the project.",
+        "RSVP for Sarah\'s birthday party.",
+        "Update resume for job application.",
+        "Research vacation destinations.",
+        "Practice guitar for at least 30 minutes.",
+        "Pay credit card bill before due date.",
+        "Try out that new recipe for dinner.",
+        "Send thank-you card to Jane.",
+        "Declutter the living room this weekend.",
+        "Plan weekend hike with friends.",
+        "Register for upcoming webinar.",
+        "Buy birthday gift for nephew.",
+        "Watch the latest episode of your favorite show.",
+        "Make dentist appointment for kids.",
+        "Review budget for next month.",
+        "Write a blog post about recent trip.",
+        "Organize digital photos into albums.",
+        "Call the plumber to fix the leaky faucet.",
+        "Clean out the garage.",
+        "Update software on your computer.",
+        "Donate unused clothes to charity.",
+        "Set up automatic bill payments.",
+        "Start learning a new language online."
+    )
+
+    val reasons = arrayOf(
+        "Sports injury",
+        "Car accident",
+        "Falls",
+        "Workplace accident",
+        "Repetitive strain injury",
+        "Muscle strain",
+        "Fracture",
+        "Sprain",
+        "Tendinitis",
+        "Ligament tear",
+        "Head injury",
+        "Stroke",
+        "Heart attack",
+        "Respiratory infection",
+        "Allergic reaction",
+        "Chronic illness",
+        "Diabetes",
+        "High blood pressure",
+        "Arthritis",
+        "Osteoporosis",
+        "Cancer",
+        "Asthma",
+        "Chronic back pain",
+        "Obesity",
+        "Anxiety disorder",
+        "Depression",
+        "Insomnia",
+        "Migraine",
+        "Digestive issues",
+        "Substance abuse"
+    )
+
+    val subjects = arrayOf(
+        "Bandage",
+        "Adhesive tape",
+        "Gauze",
+        "Antiseptic wipes",
+        "Alcohol pads",
+        "Thermometer",
+        "Pain reliever (e.g., ibuprofen, acetaminophen)",
+        "Antibiotic ointment",
+        "Hydrocortisone cream",
+        "Antihistamine (e.g., diphenhydramine)",
+        "Cough syrup",
+        "Eye drops",
+        "Nasal spray",
+        "Hand sanitizer",
+        "Disposable gloves",
+        "Face masks",
+        "Hot/cold packs",
+        "First aid kit",
+        "Oral rehydration solution (e.g., electrolyte packets)",
+        "Sunscreen",
+        "Insect repellent",
+        "Calamine lotion",
+        "Epsom salts",
+        "Compression bandage",
+        "Splint",
+        "Ear drops",
+        "Oral analgesic gel (e.g., for toothache)",
+        "Eye wash solution",
+        "Saline solution",
+        "Prescription medications"
     )
 }

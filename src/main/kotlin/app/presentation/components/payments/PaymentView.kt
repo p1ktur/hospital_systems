@@ -8,7 +8,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.unit.*
-import app.domain.model.shared.hospitalization.*
 import app.domain.model.shared.payment.*
 import app.domain.util.args.*
 

@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.*
 import app.domain.uiEvent.doctor.*
 import app.domain.uiState.doctor.*
 import app.domain.util.numbers.*
+import app.domain.util.vocabulary.*
 import app.presentation.codes.*
 import app.presentation.components.common.*
 import app.presentation.theme.*
@@ -67,6 +68,12 @@ fun DoctorInfoScreen(
                 )
                 Spacer(modifier = Modifier.height(32.dp))
             }
+            Text(
+                text = "Registered on ${uiState.registrationDate}",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.height(16.dp))
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = "Main",
@@ -268,16 +275,19 @@ fun DoctorInfoScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 if (uiState.editMode) {
-                    DefaultTextField(
+                    val vocabulary by remember { mutableStateOf(Vocabulary()) }
+                    OptionsTextField(
                         startValue = uiState.startDay,
                         label = "Start day:",
-                        onValueChange = { onUiEvent(DoctorInfoUiEvent.UpdateStartDay(it)) }
+                        options = vocabulary.daysOfWeek.toList(),
+                        onOptionSelected = { onUiEvent(DoctorInfoUiEvent.UpdateStartDay(vocabulary.daysOfWeek[it])) }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    DefaultTextField(
+                    OptionsTextField(
                         startValue = uiState.endDay,
                         label = "End day:",
-                        onValueChange = { onUiEvent(DoctorInfoUiEvent.UpdateEndDay(it)) }
+                        options = vocabulary.daysOfWeek.toList(),
+                        onOptionSelected = { onUiEvent(DoctorInfoUiEvent.UpdateEndDay(vocabulary.daysOfWeek[it])) }
                     )
                 } else {
                     Text(

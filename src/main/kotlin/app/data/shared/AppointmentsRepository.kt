@@ -4,6 +4,7 @@ import app.domain.database.transactor.*
 import app.domain.model.shared.appointment.*
 import app.domain.model.shared.payment.*
 import java.sql.*
+import java.time.*
 import java.time.format.*
 
 class AppointmentsRepository(private val transactor: ITransactor) {
@@ -97,13 +98,13 @@ class AppointmentsRepository(private val transactor: ITransactor) {
         val paymentsResult = paymentsStatement.executeQuery()
 
         val payments = buildList {
-            val formatter = DateTimeFormatter.ofPattern("HH:mm")
+            val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm")
             while (paymentsResult.next()) add(
                 Payment.Default(
                     id = paymentsResult.getInt(1),
                     payedAmount = paymentsResult.getFloat(2),
                     payedAccount = paymentsResult.getString(3),
-                    time = paymentsResult.getTime(4).toLocalTime().format(formatter),
+                    time = paymentsResult.getTimestamp(4).toLocalDateTime().format(formatter),
                     helpIdType = 0,
                     helpId = -1,
                     clientName = "",
@@ -184,13 +185,13 @@ class AppointmentsRepository(private val transactor: ITransactor) {
         val paymentsResult = paymentsStatement.executeQuery()
 
         val payments = buildList {
-            val formatter = DateTimeFormatter.ofPattern("HH:mm")
+            val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm")
             while (paymentsResult.next()) add(
                 Payment.Default(
                     id = paymentsResult.getInt(1),
                     payedAmount = paymentsResult.getFloat(2),
                     payedAccount = paymentsResult.getString(3),
-                    time = paymentsResult.getTime(4).toLocalTime().format(formatter),
+                    time = paymentsResult.getTimestamp(4).toLocalDateTime().format(formatter),
                     helpIdType = 0,
                     helpId = -1,
                     clientName = clientName,
@@ -208,7 +209,7 @@ class AppointmentsRepository(private val transactor: ITransactor) {
         TransactorResult.Success(fetchAppointmentData)
     }
 
-    fun createAppointment(userWorkerId: Int, userClientId: Int, date: java.util.Date) = transactor.startTransaction {
+    fun createAppointment(userWorkerId: Int, userClientId: Int, localDateTime: LocalDateTime) = transactor.startTransaction {
         val medCardStatement = createStatement()
         val medCardResult = medCardStatement.executeQuery("SELECT medical_card.id FROM user_client " +
                 "INNER JOIN medical_card ON medical_card.id = user_client.medical_card_id " +
@@ -224,7 +225,7 @@ class AppointmentsRepository(private val transactor: ITransactor) {
         val insertStatement = prepareStatement("INSERT INTO appointment (medical_card_id, doctor_id, date) VALUES (?, ?, ?)")
         insertStatement.setInt(1, medCardResult.getInt(1))
         insertStatement.setInt(2, workerResult.getInt(1))
-        insertStatement.setTimestamp(3, Timestamp(date.time))
+        insertStatement.setTimestamp(3, Timestamp.valueOf(localDateTime))
         insertStatement.executeUpdate()
 
         TransactorResult.Success("Success")

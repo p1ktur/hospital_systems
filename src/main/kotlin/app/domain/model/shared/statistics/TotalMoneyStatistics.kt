@@ -23,17 +23,17 @@ data class TotalMoneyStatistics(
                 },
                 perWeek = buildList {
                     for (i in 0 until 12) {
-                        add(appointmentStatistics.moneyPerDay[i] + hospitalizationStatistics.moneyPerDay[i] + additionalPaymentStatistics.perDay[i])
+                        add(appointmentStatistics.moneyPerWeek[i] + hospitalizationStatistics.moneyPerWeek[i] + additionalPaymentStatistics.perWeek[i])
                     }
                 },
                 perMonth = buildList {
                     for (i in 0 until 12) {
-                        add(appointmentStatistics.moneyPerDay[i] + hospitalizationStatistics.moneyPerDay[i] + additionalPaymentStatistics.perDay[i])
+                        add(appointmentStatistics.moneyPerMonth[i] + hospitalizationStatistics.moneyPerMonth[i] + additionalPaymentStatistics.perMonth[i])
                     }
                 },
                 perYear = buildList {
                     for (i in 0 until 1) {
-                        add(appointmentStatistics.moneyPerDay[i] + hospitalizationStatistics.moneyPerDay[i] + additionalPaymentStatistics.perDay[i])
+                        add(appointmentStatistics.moneyPerYear[i] + hospitalizationStatistics.moneyPerYear[i] + additionalPaymentStatistics.perYear[i])
                     }
                 }
             )

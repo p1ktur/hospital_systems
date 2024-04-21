@@ -23,9 +23,14 @@ import moe.tlaster.precompose.navigation.*
 @Composable
 fun AdminNavigationScreen() {
     val adminViewModel = koinViewModel<AdminViewModel>()
+    val adminViewModelIsLoading by remember { adminViewModel.isLoading }
 
     var showDirPickerForExportData by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
+
+    LaunchedEffect(key1 = adminViewModelIsLoading, block = {
+        isLoading = adminViewModelIsLoading
+    })
 
     TabNavigator(
         navOptions = listOf(
@@ -72,9 +77,17 @@ fun AdminNavigationScreen() {
                 onClick = {
                     showDirPickerForExportData = true
                 }
+            ),
+            MenuOption(
+                text = "Regenerate data",
+                showOnlyOnWelcomeScreen = true,
+                onClick = {
+                    adminViewModel.reInitializeDatabase()
+                }
             )
         ),
-        isLoading = isLoading
+        isLoading = isLoading,
+        navigationAllowed = !adminViewModelIsLoading
     ) { navController ->
         NavHost(
             modifier = Modifier.fillMaxSize(),

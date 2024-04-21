@@ -6,7 +6,6 @@ import app.domain.util.time.*
 import kotlinx.coroutines.*
 import java.time.*
 import kotlin.math.*
-import kotlin.text.Typography.tm
 
 class StatisticsRepository(private val transactor: ITransactor) {
 
@@ -181,7 +180,10 @@ class StatisticsRepository(private val transactor: ITransactor) {
             scope.async(Dispatchers.IO) {
                 // Rooms
                 val allStatement = createStatement()
-                val allResult = allStatement.executeQuery("SELECT COUNT(*) FROM room")
+                val allResult = allStatement.executeQuery("SELECT COUNT(*) FROM room " +
+                        "JOIN room_location ON room.location_id = room_location.id " +
+                        "JOIN room_type ON room_location.type_id = room_type.id " +
+                        "WHERE room_type.id = 2")
                 allResult.next()
 
                 val busyStatement = createStatement()
@@ -203,7 +205,7 @@ class StatisticsRepository(private val transactor: ITransactor) {
                 val tpStatement = createStatement()
                 val tpResult = tpStatement.executeQuery("SELECT COUNT(*) FROM medical_card")
                 tpResult.next()
-                tp = twResult.getInt(1)
+                tp = tpResult.getInt(1)
             }
         )
 
