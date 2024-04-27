@@ -1,13 +1,20 @@
 package app.data.shared
 
+import app.data.doctor.*
 import app.domain.database.transactor.*
+import app.domain.model.doctor.*
 import app.domain.model.shared.appointment.*
 import app.domain.model.shared.payment.*
+import app.domain.util.exceptions.*
+import app.domain.util.time.*
 import java.sql.*
 import java.time.*
 import java.time.format.*
 
-class AppointmentsRepository(private val transactor: ITransactor) {
+class AppointmentsRepository(
+    private val transactor: ITransactor,
+    private val doctorScheduleRepository: DoctorScheduleRepository
+) {
 
     fun fetchAppointmentsForAdmin(): TransactorResult = transactor.startTransaction {
         val userWorkersStatement = createStatement()
@@ -48,7 +55,7 @@ class AppointmentsRepository(private val transactor: ITransactor) {
         val doctorName = nameResult.getString(1)
         val doctorId = nameResult.getInt(2)
 
-        val appointmentsStatement = prepareStatement("SELECT appointment.id, patient.name, user_client.id, result_id, date, public.user.login FROM appointment " +
+        val appointmentsStatement = prepareStatement("SELECT appointment.id, patient.name, user_client.id, result_id, date, public.user.login, approved FROM appointment " +
                 "INNER JOIN medical_card ON appointment.medical_card_id = medical_card.id " +
                 "INNER JOIN user_client ON user_client.medical_card_id = medical_card.id " +
                 "INNER JOIN patient ON patient.id = medical_card.patient_id " +
@@ -68,7 +75,8 @@ class AppointmentsRepository(private val transactor: ITransactor) {
                     userClientId = appointmentsResult.getInt(3),
                     userDoctorId = userWorkerId,
                     resultId = appointmentsResult.getInt(4),
-                    date = appointmentsResult.getTimestamp(5).toLocalDateTime().format(formatter)
+                    date = appointmentsResult.getTimestamp(5).toLocalDateTime().format(formatter),
+                    approved = appointmentsResult.getBoolean(7)
                 )
             )
         }
@@ -135,7 +143,7 @@ class AppointmentsRepository(private val transactor: ITransactor) {
         val clientLogin = nameResult.getString(3)
         val medCardId = nameResult.getInt(2)
 
-        val appointmentsStatement = prepareStatement("SELECT appointment.id, worker.name, user_doctor.id, result_id, date FROM appointment " +
+        val appointmentsStatement = prepareStatement("SELECT appointment.id, worker.name, user_doctor.id, result_id, date, approved FROM appointment " +
                 "INNER JOIN medical_card ON appointment.medical_card_id = medical_card.id " +
                 "INNER JOIN worker ON appointment.doctor_id = worker.id " +
                 "INNER JOIN user_client ON user_client.medical_card_id = medical_card.id " +
@@ -155,7 +163,8 @@ class AppointmentsRepository(private val transactor: ITransactor) {
                     userClientId = userClientId,
                     userDoctorId = appointmentsResult.getInt(3),
                     resultId = appointmentsResult.getInt(4),
-                    date = appointmentsResult.getTimestamp(5).toLocalDateTime().format(formatter)
+                    date = appointmentsResult.getTimestamp(5).toLocalDateTime().format(formatter),
+                    approved = appointmentsResult.getBoolean(6)
                 )
             )
         }
@@ -222,10 +231,11 @@ class AppointmentsRepository(private val transactor: ITransactor) {
                 "WHERE user_doctor.id = $userWorkerId")
         workerResult.next()
 
-        val insertStatement = prepareStatement("INSERT INTO appointment (medical_card_id, doctor_id, date) VALUES (?, ?, ?)")
+        val insertStatement = prepareStatement("INSERT INTO appointment (medical_card_id, doctor_id, date, approved) VALUES (?, ?, ?, ?)")
         insertStatement.setInt(1, medCardResult.getInt(1))
         insertStatement.setInt(2, workerResult.getInt(1))
         insertStatement.setTimestamp(3, Timestamp.valueOf(localDateTime))
+        insertStatement.setBoolean(4, true)
         insertStatement.executeUpdate()
 
         TransactorResult.Success("Success")
@@ -241,6 +251,49 @@ class AppointmentsRepository(private val transactor: ITransactor) {
         val updateStatement = prepareStatement("UPDATE appointment SET result_id = ? WHERE id = ?")
         updateStatement.setInt(1, insertResult.getInt(1))
         updateStatement.setInt(2, appointmentId)
+        updateStatement.executeUpdate()
+
+        TransactorResult.Success("Success")
+    }
+
+    fun requestApprovalForAppointment(userWorkerId: Int, userClientId: Int, localDateTime: LocalDateTime) = transactor.startTransaction {
+        val medCardStatement = createStatement()
+        val medCardResult = medCardStatement.executeQuery("SELECT medical_card.id FROM user_client " +
+                "INNER JOIN medical_card ON medical_card.id = user_client.medical_card_id " +
+                "WHERE user_client.id = $userClientId")
+        medCardResult.next()
+
+        val workerStatement = createStatement()
+        val workerResult = workerStatement.executeQuery("SELECT worker.id FROM user_doctor " +
+                "INNER JOIN worker ON worker.id = user_doctor.worker_id " +
+                "WHERE user_doctor.id = $userWorkerId")
+        workerResult.next()
+
+        val checkStatement = createStatement()
+        val checkResult = checkStatement.executeQuery("SELECT COUNT(approved) FROM appointment " +
+                "JOIN medical_card ON medical_card.id = appointment.medical_card_id " +
+                "WHERE medical_card.id = ${medCardResult.getInt(1)} AND " +
+                "appointment.doctor_id = ${workerResult.getInt(1)} AND " +
+                "approved = FALSE")
+        checkResult.next()
+
+        if (checkResult.getInt(1) == 0) {
+            val insertStatement = prepareStatement("INSERT INTO appointment (medical_card_id, doctor_id, date, approved) VALUES (?, ?, ?, ?)")
+            insertStatement.setInt(1, medCardResult.getInt(1))
+            insertStatement.setInt(2, workerResult.getInt(1))
+            insertStatement.setTimestamp(3, Timestamp.valueOf(localDateTime))
+            insertStatement.setBoolean(4, false)
+            insertStatement.executeUpdate()
+
+            TransactorResult.Success("Success")
+        } else {
+            TransactorResult.Failure(FailedOperationException(1203))
+        }
+    }
+
+    fun approveAppointment(appointmentId: Int) = transactor.startTransaction {
+        val updateStatement = prepareStatement("UPDATE appointment SET approved = TRUE WHERE id = ?")
+        updateStatement.setInt(1, appointmentId)
         updateStatement.executeUpdate()
 
         TransactorResult.Success("Success")
@@ -282,10 +335,54 @@ class AppointmentsRepository(private val transactor: ITransactor) {
         TransactorResult.Success("Success")
     }
 
-    fun deleteAppointment(appointmentId: Int) = transactor.startTransaction {
+    fun deleteRequestedAppointment(appointmentId: Int) = transactor.startTransaction {
         val deleteStatement1 = createStatement()
-        deleteStatement1.executeUpdate("DELETE FROM appointment WHERE id = $appointmentId")
+        val rowsAffected = deleteStatement1.executeUpdate("DELETE FROM appointment WHERE id = $appointmentId AND approved = false")
 
-        TransactorResult.Success("Success")
+        if (rowsAffected == 0) {
+            TransactorResult.Failure(FailedOperationException(1202))
+        } else {
+            TransactorResult.Success("Success")
+        }
+    }
+
+    fun deleteAppointment(appointmentId: Int) = transactor.startTransaction {
+        val paymentStatement = createStatement()
+        val paymentResult = paymentStatement.executeQuery("SELECT payment.id FROM payment " +
+                "JOIN appointment_result ON appointment_result.payment_id = payment.id " +
+                "JOIN appointment ON appointment_result.id = appointment.result_id " +
+                "WHERE appointment.id = $appointmentId")
+
+        if (!paymentResult.next()) {
+            val deleteStatement1 = createStatement()
+            deleteStatement1.executeUpdate("DELETE FROM appointment WHERE id = $appointmentId")
+
+            TransactorResult.Success("Success")
+        } else {
+            TransactorResult.Failure(FailedOperationException(1201))
+        }
+    }
+
+    fun requestSchedule(userWorkerId: Int) = transactor.startTransaction {
+        when (val scheduleResult = doctorScheduleRepository.fetchInfo(userWorkerId)) {
+            is TransactorResult.Failure -> TransactorResult.Failure(FailedOperationException(1204))
+            is TransactorResult.Success<*> -> {
+                val scheduleData = scheduleResult.data as DoctorScheduleData
+
+                val busyDatesStatement = createStatement()
+                val busyDatesResult = busyDatesStatement.executeQuery("SELECT date FROM appointment " +
+                        "JOIN worker ON doctor_id = worker.id " +
+                        "JOIN user_doctor ON worker_id = worker.id " +
+                        "WHERE user_doctor.id = $userWorkerId")
+
+                val busyFutureDates = buildList {
+                    while (busyDatesResult.next()) {
+                        add(busyDatesResult.getTimestamp(1).toLocalDateTime() ?: LocalDateTime.now())
+                    }
+                }.filter { it.isAfter(LocalDateTime.now()) }.sort()
+
+                TransactorResult.Success(scheduleData to busyFutureDates)
+            }
+        }
     }
 }

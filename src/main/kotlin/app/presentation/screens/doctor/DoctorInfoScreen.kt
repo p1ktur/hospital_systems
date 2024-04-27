@@ -276,6 +276,17 @@ fun DoctorInfoScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 if (uiState.editMode) {
                     val vocabulary by remember { mutableStateOf(Vocabulary()) }
+
+                    LaunchedEffect(key1 = true) {
+                        if (uiState.startDay.isBlank()) {
+                            onUiEvent(DoctorInfoUiEvent.UpdateStartDay(vocabulary.daysOfWeek[0]))
+                        }
+
+                        if (uiState.endDay.isBlank()) {
+                            onUiEvent(DoctorInfoUiEvent.UpdateEndDay(vocabulary.daysOfWeek[0]))
+                        }
+                    }
+
                     OptionsTextField(
                         startValue = uiState.startDay,
                         label = "Start day:",
@@ -338,14 +349,40 @@ fun DoctorInfoScreen(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 if (uiState.editMode) {
-                    DefaultTextField(
-                        startValue = uiState.hoursForRest,
-                        label = "Rest hours per day:",
-                        onValueChange = { onUiEvent(DoctorInfoUiEvent.UpdateRestHours(it)) }
+                    var startTimeError by remember {
+                        mutableStateOf(false)
+                    }
+
+                    var endTimeError by remember {
+                        mutableStateOf(false)
+                    }
+
+                    LaunchedEffect(key1 = startTimeError, key2 = endTimeError, block = {
+                        saveChangesAllowed = !startTimeError && !endTimeError
+                    })
+
+                    TimeTextField(
+                        startValue = uiState.restStartTime,
+                        label = "Rest start time:",
+                        onValueChange = { onUiEvent(DoctorInfoUiEvent.UpdateRestStartTime(it)) },
+                        isError = startTimeError,
+                        onErrorChange = { isError ->
+                            startTimeError = isError
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TimeTextField(
+                        startValue = uiState.restEndTime,
+                        label = "Rest end time:",
+                        onValueChange = { onUiEvent(DoctorInfoUiEvent.UpdateRestEndTime(it)) },
+                        isError = endTimeError,
+                        onErrorChange = { isError ->
+                            endTimeError = isError
+                        }
                     )
                 } else {
                     Text(
-                        text = "Rest hours per day: ${uiState.hoursForRest}",
+                        text = "Resting time: ${uiState.restStartTime} - ${uiState.restEndTime}",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onBackground
                     )

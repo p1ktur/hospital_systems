@@ -3,11 +3,15 @@ package app.data.shared
 import app.domain.database.transactor.*
 import app.domain.model.shared.statistics.*
 import app.domain.util.time.*
+import app.domain.util.vocabulary.*
 import kotlinx.coroutines.*
 import java.time.*
 import kotlin.math.*
 
-class StatisticsRepository(private val transactor: ITransactor) {
+class StatisticsRepository(
+    private val transactor: ITransactor,
+    private val vocabulary: Vocabulary
+) {
 
     suspend fun fetchStatisticsData(scope: CoroutineScope): TransactorResult = transactor.startSuspendTransaction {
         var ast: AppointmentStatistics? = null
@@ -19,6 +23,7 @@ class StatisticsRepository(private val transactor: ITransactor) {
         var rd: RoomDataForStatistics? = null
         var tw = 0
         var tp = 0
+        var sn: SicknessStatistics? = null
 
         awaitAll(
             scope.async(Dispatchers.IO) {
@@ -206,6 +211,25 @@ class StatisticsRepository(private val transactor: ITransactor) {
                 val tpResult = tpStatement.executeQuery("SELECT COUNT(*) FROM medical_card")
                 tpResult.next()
                 tp = tpResult.getInt(1)
+            },
+            scope.async(Dispatchers.IO) {
+                // Sicknesses
+                val snStatement = createStatement()
+                val snResult = snStatement.executeQuery("SELECT notes FROM appointment_result")
+
+                val sicknessList = buildList {
+                    while (snResult.next()) {
+                        val sickness = vocabulary.sicknesses.find { snResult.getString(1).contains(it, true) }
+                        if (sickness != null) add(sickness)
+                    }
+                }
+
+
+                val keys = sicknessList.distinct()
+
+                sn = SicknessStatistics(
+                    sicknessOccurrencesPerYear = keys.map { key -> key to sicknessList.count { key == it } }.sortedBy { it.second }.toMap()
+                )
             }
         )
 
@@ -223,7 +247,8 @@ class StatisticsRepository(private val transactor: ITransactor) {
             bestDoctorsByAppointments = bd.sortedByDescending { it.earnedMoney },
             roomDataForStatistics = rd ?: RoomDataForStatistics(),
             totalWorkers = tw,
-            totalPatients = tp
+            totalPatients = tp,
+            sicknessStatistics = sn ?: SicknessStatistics()
         )
 
         TransactorResult.Success(statisticsFetchData)

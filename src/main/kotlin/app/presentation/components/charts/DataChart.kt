@@ -27,6 +27,7 @@ import kotlin.random.*
 fun DataChart(
     modifier: Modifier,
     chartTimeData: List<ChartTimeData>,
+    customLabels: List<String>? = null,
     chartSettings: ChartSettings
 ) {
     if (chartTimeData.isEmpty()) return
@@ -90,6 +91,7 @@ fun DataChart(
                     drawDataOnChart(
                         textMeasurer = textMeasurer,
                         chartTimeData = chosenChartTimeData,
+                        customLabels = customLabels,
                         chartSettings = chartSettings
                     )
                 }
@@ -198,10 +200,14 @@ fun DrawScope.drawChartBackground(chartSettings: ChartSettings) {
 }
 
 fun DrawScope.drawDataOnChart(
-    chartTimeData: ChartTimeData,
     textMeasurer: TextMeasurer,
+    chartTimeData: ChartTimeData,
+    customLabels: List<String>?,
     chartSettings: ChartSettings
 ) {
+    val now = LocalDateTime.now()
+    val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+
     val data = chartTimeData.data
     val min = if (data.any { it < 0 }) {
         data.minOrNull() ?: return
@@ -315,8 +321,6 @@ fun DrawScope.drawDataOnChart(
         )
 
         val reverseIndex = data.size - index
-        val now = LocalDateTime.now()
-        val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
         val columnText = when (chartTimeData) {
             is ChartTimeData.Hour -> "TODO"
             is ChartTimeData.Day -> {
@@ -342,18 +346,25 @@ fun DrawScope.drawDataOnChart(
             style = chartSettings.dataTextStyle
         )
         var textPoint = point.copy(x = point.x + 0.5f / width * size.width * 0.9f, y = size.height * 0.975f)
-        drawText(
-            textLayoutResult = textLayoutResult,
-            topLeft = textPoint.copy(
-                x = textPoint.x - textLayoutResult.size.width / 2,
-                y = textPoint.y - textLayoutResult.size.height / 2
-            ),
-            color = chartSettings.textColor
-        )
+
+        if ((chartTimeData is ChartTimeData.Year && data.size == 1) || chartTimeData !is ChartTimeData.Year) {
+            drawText(
+                textLayoutResult = textLayoutResult,
+                topLeft = textPoint.copy(
+                    x = textPoint.x - textLayoutResult.size.width / 2,
+                    y = textPoint.y - textLayoutResult.size.height / 2
+                ),
+                color = chartSettings.textColor
+            )
+        }
 
         if (entry != 0) {
             textLayoutResult = textMeasurer.measure(
-                text = entry.toString(),
+                text = if (customLabels?.isNotEmpty() == true) {
+                    customLabels.getOrNull(index % customLabels.size) ?: entry.toString()
+                } else {
+                    entry.toString()
+                },
                 style = chartSettings.dataTextStyle
             )
             textPoint = point.copy(x = point.x + 0.5f / width * size.width * 0.9f, y = size.height * 0.94f)
@@ -372,5 +383,22 @@ fun DrawScope.drawDataOnChart(
                 )
             }
         }
+    }
+
+    val textLayoutResult = textMeasurer.measure(
+        text = "Current year: ${now.minusYears(1).format(formatter)} - ${now.format(formatter)}",
+        style = chartSettings.dataTextStyle
+    )
+    val textPoint = Offset(x = size.width * 0.525f, y = size.height * 0.975f)
+
+    if (chartTimeData is ChartTimeData.Year && data.size > 1) {
+        drawText(
+            textLayoutResult = textLayoutResult,
+            topLeft = textPoint.copy(
+                x = textPoint.x - textLayoutResult.size.width / 2,
+                y = textPoint.y - textLayoutResult.size.height / 2
+            ),
+            color = chartSettings.textColor
+        )
     }
 }

@@ -2,15 +2,16 @@ package app.domain.viewModel.shared
 
 import app.data.shared.*
 import app.domain.database.transactor.*
+import app.domain.model.doctor.*
 import app.domain.model.shared.appointment.*
 import app.domain.uiEvent.shared.*
 import app.domain.uiState.shared.*
+import app.domain.util.args.*
+import app.domain.util.exceptions.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import moe.tlaster.precompose.viewmodel.*
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
+import java.time.*
 
 class AppointmentsViewModel(private val appointmentsRepository: AppointmentsRepository) : ViewModel() {
 
@@ -25,7 +26,11 @@ class AppointmentsViewModel(private val appointmentsRepository: AppointmentsRepo
 
             is AppointmentsUiEvent.CreateAppointment -> createAppointment(event.selfUserWorkerId, event.userWorkerId, event.userClientId, event.localDateTime)
             is AppointmentsUiEvent.CreateAppointmentResult -> createAppointmentResult(event.userWorkerId, event.appointmentId, event.price, event.notes)
+            is AppointmentsUiEvent.RequestApprovalForAppointment -> requestApprovalForAppointment(event.userWorkerId, event.userClientId, event.localDateTime)
+            is AppointmentsUiEvent.ApproveAppointment -> approveAppointment(event.userWorkerId, event.appointmentId)
             is AppointmentsUiEvent.PayForAppointment -> payForAppointment(event.userClientId, event.appointmentResultId, event.payedAmount, event.payedAccount)
+            is AppointmentsUiEvent.DenyRequestedAppointment -> denyRequestedAppointment(event.userWorkerId, event.appointmentId)
+            is AppointmentsUiEvent.DeleteRequestedAppointment -> deleteRequestedAppointment(event.userClientId, event.appointmentId)
             is AppointmentsUiEvent.DeleteAppointment -> deleteAppointment(event.userWorkerId, event.appointmentId)
             is AppointmentsUiEvent.DeleteAppointmentWithResult -> deleteAppointmentWithResult(event.userWorkerId, event.appointmentId, event.resultId)
             is AppointmentsUiEvent.ToggleEditMode -> toggleEditMode(event.userWorkerId, event.resultId, event.price, event.notes)
@@ -33,7 +38,7 @@ class AppointmentsViewModel(private val appointmentsRepository: AppointmentsRepo
 
             AppointmentsUiEvent.ShowInfoDialog -> showInfoDialog()
             AppointmentsUiEvent.HideInfoDialog -> hideInfoDialog()
-            is AppointmentsUiEvent.ShowDateTimePickerDialog -> showDateTimePickerDialog(event.userWorkerId, event.userClientId)
+            is AppointmentsUiEvent.ShowDateTimePickerDialog -> showDateTimePickerDialog(event.appArgs, event.userWorkerId, event.userClientId)
             AppointmentsUiEvent.HideDateTimePickerDialog -> hideDateTimePickerDialog()
         }
     }
@@ -106,6 +111,12 @@ class AppointmentsViewModel(private val appointmentsRepository: AppointmentsRepo
         )
 
         viewModelScope.launch(Dispatchers.IO) {
+            _uiState.value = uiState.value.copy(
+                appointments = emptyList(),
+                results = emptyList(),
+                payments = emptyList()
+            )
+
             when (val fetchAppointmentsResult = appointmentsRepository.fetchAppointmentsForClient(userClientId)) {
                 is TransactorResult.Failure -> {
                     _uiState.value = uiState.value.copy(
@@ -173,6 +184,63 @@ class AppointmentsViewModel(private val appointmentsRepository: AppointmentsRepo
                 is TransactorResult.Success<*> -> {
                     _uiState.value = uiState.value.copy(
                         isLoading = false,
+                        errorCodes = emptyList()
+                    )
+
+                    fetchAppointmentsForDoctor(userWorkerId, null)
+                }
+            }
+        }
+    }
+
+    private fun requestApprovalForAppointment(userWorkerId: Int, userClientId: Int, localDateTime: LocalDateTime) {
+        if (uiState.value.isLoading) return
+
+        _uiState.value = uiState.value.copy(
+            isLoading = true
+        )
+
+        viewModelScope.launch(Dispatchers.IO) {
+            when (val result = appointmentsRepository.requestApprovalForAppointment(userWorkerId, userClientId, localDateTime)) {
+                is TransactorResult.Failure -> {
+                    val exception = result.exception as? FailedOperationException
+                    _uiState.value = uiState.value.copy(
+                        isLoading = false,
+                        errorCodes = listOf(exception?.code ?: 1003)
+                    )
+                }
+                is TransactorResult.Success<*> -> {
+                    _uiState.value = uiState.value.copy(
+                        isLoading = false,
+                        errorCodes = emptyList()
+                    )
+
+                    fetchAppointmentsForClient(userClientId, null)
+                }
+            }
+        }
+    }
+
+    private fun approveAppointment(userWorkerId: Int, appointmentId: Int) {
+        if (uiState.value.isLoading) return
+
+        _uiState.value = uiState.value.copy(
+            isLoading = true
+        )
+
+        viewModelScope.launch(Dispatchers.IO) {
+            when (appointmentsRepository.approveAppointment(appointmentId)) {
+                is TransactorResult.Failure -> {
+                    _uiState.value = uiState.value.copy(
+                        isLoading = false,
+                        editMode = false,
+                        errorCodes = listOf(1003)
+                    )
+                }
+                is TransactorResult.Success<*> -> {
+                    _uiState.value = uiState.value.copy(
+                        isLoading = false,
+                        editMode = false,
                         errorCodes = emptyList()
                     )
 
@@ -253,12 +321,13 @@ class AppointmentsViewModel(private val appointmentsRepository: AppointmentsRepo
         )
 
         viewModelScope.launch(Dispatchers.IO) {
-            when (appointmentsRepository.deleteAppointmentAndResult(appointmentId, resultId)) {
+            when (val result = appointmentsRepository.deleteAppointmentAndResult(appointmentId, resultId)) {
                 is TransactorResult.Failure -> {
+                    val exception = result.exception as? FailedOperationException
                     _uiState.value = uiState.value.copy(
                         isLoading = false,
                         editMode = false,
-                        errorCodes = listOf(1003)
+                        errorCodes = listOf(exception?.code ?: 1003)
                     )
                 }
                 is TransactorResult.Success<*> -> {
@@ -269,6 +338,66 @@ class AppointmentsViewModel(private val appointmentsRepository: AppointmentsRepo
                     )
 
                     fetchAppointmentsForDoctor(userWorkerId, null)
+                }
+            }
+        }
+    }
+
+    private fun denyRequestedAppointment(userWorkerId: Int, appointmentId: Int) {
+        if (uiState.value.isLoading) return
+
+        _uiState.value = uiState.value.copy(
+            isLoading = true
+        )
+
+        viewModelScope.launch(Dispatchers.IO) {
+            when (val result = appointmentsRepository.deleteRequestedAppointment(appointmentId)) {
+                is TransactorResult.Failure -> {
+                    val exception = result.exception as? FailedOperationException
+                    _uiState.value = uiState.value.copy(
+                        isLoading = false,
+                        editMode = false,
+                        errorCodes = listOf(exception?.code ?: 1003)
+                    )
+                }
+                is TransactorResult.Success<*> -> {
+                    _uiState.value = uiState.value.copy(
+                        isLoading = false,
+                        editMode = false,
+                        errorCodes = emptyList()
+                    )
+
+                    fetchAppointmentsForDoctor(userWorkerId, null)
+                }
+            }
+        }
+    }
+
+    private fun deleteRequestedAppointment(userClientId: Int, appointmentId: Int) {
+        if (uiState.value.isLoading) return
+
+        _uiState.value = uiState.value.copy(
+            isLoading = true
+        )
+
+        viewModelScope.launch(Dispatchers.IO) {
+            when (val result = appointmentsRepository.deleteRequestedAppointment(appointmentId)) {
+                is TransactorResult.Failure -> {
+                    val exception = result.exception as? FailedOperationException
+                    _uiState.value = uiState.value.copy(
+                        isLoading = false,
+                        editMode = false,
+                        errorCodes = listOf(exception?.code ?: 1003)
+                    )
+                }
+                is TransactorResult.Success<*> -> {
+                    _uiState.value = uiState.value.copy(
+                        isLoading = false,
+                        editMode = false,
+                        errorCodes = emptyList()
+                    )
+
+                    fetchAppointmentsForClient(userClientId, null)
                 }
             }
         }
@@ -321,12 +450,44 @@ class AppointmentsViewModel(private val appointmentsRepository: AppointmentsRepo
         )
     }
 
-    private fun showDateTimePickerDialog(userWorkerId: Int, userClientId: Int) {
+    @Suppress("UNCHECKED_CAST")
+    private fun showDateTimePickerDialog(appArgs: AppArgs, userWorkerId: Int, userClientId: Int) {
+        if (uiState.value.isLoading) return
+
         _uiState.value = uiState.value.copy(
-            showDateTimePickerDialog = true,
-            userWorkerIdForAppointment = userWorkerId,
-            userClientIdForAppointment = userClientId
+            isLoading = true
         )
+
+        viewModelScope.launch(Dispatchers.IO) {
+            when (val scheduleResult = appointmentsRepository.requestSchedule(userWorkerId)) {
+                is TransactorResult.Failure -> {
+                    val data = scheduleResult.exception as? FailedOperationException
+                    _uiState.value = uiState.value.copy(
+                        isLoading = false,
+                        errorCodes = listOf(data?.code ?: 1003)
+                    )
+                }
+                is TransactorResult.Success<*> -> {
+                    val data = scheduleResult.data as Pair<*, *>
+
+                    _uiState.value = uiState.value.copy(
+                        isLoading = false,
+                        errorCodes = emptyList(),
+                        showDateTimePickerDialog = true,
+                        userWorkerIdForAppointment = userWorkerId,
+                        userClientIdForAppointment = userClientId,
+                        scheduleData = data.first as DoctorScheduleData,
+                        busyFutureDates = data.second as List<LocalDateTime>
+                    )
+
+                    when (appArgs) {
+                        AppArgs.CLIENT -> fetchAppointmentsForClient(userClientId, null)
+                        AppArgs.DOCTOR -> fetchAppointmentsForDoctor(userWorkerId, null)
+                        AppArgs.ADMIN -> fetchAppointmentsForAdmin(null)
+                    }
+                }
+            }
+        }
     }
 
     private fun hideDateTimePickerDialog() {

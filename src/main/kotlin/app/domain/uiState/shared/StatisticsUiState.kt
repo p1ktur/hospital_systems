@@ -15,5 +15,6 @@ data class StatisticsUiState(
     val bestDoctorsByAppointments: List<DoctorForStatistics> = emptyList(),
     val roomDataForStatistics: RoomDataForStatistics = RoomDataForStatistics(),
     val totalWorkers: Int = 0,
-    val totalPatients: Int = 0
+    val totalPatients: Int = 0,
+    val sicknessStatistics: SicknessStatistics = SicknessStatistics()
 )

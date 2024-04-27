@@ -56,7 +56,7 @@ fun DoctorScheduleScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Rest hours per day: ${uiState.hoursForRest}",
+                text = "Resting time: ${uiState.restStartTime} - ${uiState.restEndTime}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )

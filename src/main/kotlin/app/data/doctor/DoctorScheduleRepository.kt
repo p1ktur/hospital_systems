@@ -7,26 +7,58 @@ import java.time.format.*
 
 class DoctorScheduleRepository(private val transactor: ITransactor) {
 
-    fun fetchInfo(userWorkerId: Int): TransactorResult = transactor.startTransaction {
+    fun fetchInfoSafely(userWorkerId: Int): TransactorResult = transactor.startTransaction {
         val userWorkerStatement = createStatement()
         val userWorkerResult = userWorkerStatement.executeQuery("SELECT user_id, worker_id FROM user_doctor WHERE id = $userWorkerId")
         userWorkerResult.next()
 
-        val scheduleStatement = prepareStatement("SELECT start_time, end_time, start_day, end_day, hours_for_rest FROM schedule, worker WHERE worker.id = ? AND worker.schedule_id = schedule.id")
+        val scheduleStatement = prepareStatement("SELECT start_time, end_time, start_day, end_day, rest_start_time, rest_end_time, name FROM schedule, worker " +
+                "WHERE worker.id = ? AND worker.schedule_id = schedule.id")
         scheduleStatement.setInt(1, userWorkerResult.getInt(2))
         val scheduleResult = scheduleStatement.executeQuery()
 
         val formatter = DateTimeFormatter.ofPattern("HH:mm")
         val doctorScheduleData = if (scheduleResult.next()) {
             DoctorScheduleData(
-                startTime = scheduleResult.getTime(1).toLocalTime().format(formatter),
-                endTime = scheduleResult.getTime(2).toLocalTime().format(formatter),
+                doctorName = scheduleResult.getString(7),
+                startTime = scheduleResult.getTime(1)?.toLocalTime()?.format(formatter) ?: "",
+                endTime = scheduleResult.getTime(2)?.toLocalTime()?.format(formatter) ?: "",
                 startDay = scheduleResult.getString(3),
                 endDay = scheduleResult.getString(4),
-                hoursForRest = scheduleResult.getFloat(5)
+                restStartTime = scheduleResult.getTime(5)?.toLocalTime()?.format(formatter) ?: "",
+                restEndTime = scheduleResult.getTime(6)?.toLocalTime()?.format(formatter) ?: ""
             )
         } else DoctorScheduleData()
+
         TransactorResult.Success(doctorScheduleData)
+    }
+
+    fun fetchInfo(userWorkerId: Int): TransactorResult = transactor.startTransaction {
+        val userWorkerStatement = createStatement()
+        val userWorkerResult = userWorkerStatement.executeQuery("SELECT user_id, worker_id FROM user_doctor WHERE id = $userWorkerId")
+        userWorkerResult.next()
+
+        val scheduleStatement = prepareStatement("SELECT start_time, end_time, start_day, end_day, rest_start_time, rest_end_time, name FROM schedule, worker " +
+                "WHERE worker.id = ? AND worker.schedule_id = schedule.id")
+        scheduleStatement.setInt(1, userWorkerResult.getInt(2))
+        val scheduleResult = scheduleStatement.executeQuery()
+
+        val formatter = DateTimeFormatter.ofPattern("HH:mm")
+        if (scheduleResult.next()) {
+            val doctorScheduleData = DoctorScheduleData(
+                doctorName = scheduleResult.getString(7),
+                startTime = scheduleResult.getTime(1)?.toLocalTime()?.format(formatter) ?: "",
+                endTime = scheduleResult.getTime(2)?.toLocalTime()?.format(formatter) ?: "",
+                startDay = scheduleResult.getString(3),
+                endDay = scheduleResult.getString(4),
+                restStartTime = scheduleResult.getTime(5)?.toLocalTime()?.format(formatter) ?: "",
+                restEndTime = scheduleResult.getTime(6)?.toLocalTime()?.format(formatter) ?: ""
+            )
+
+            TransactorResult.Success(doctorScheduleData)
+        } else {
+            TransactorResult.Failure(Exception())
+        }
     }
 
     fun saveChanges(
@@ -35,7 +67,8 @@ class DoctorScheduleRepository(private val transactor: ITransactor) {
         endTime: String,
         startDay: String,
         endDay: String,
-        hoursForRest: String
+        restStartTime: String,
+        restEndTime: String,
     ): TransactorResult = transactor.startTransaction {
         val checkStatement = prepareStatement("SELECT schedule.id FROM schedule, user_doctor, worker " +
                 "WHERE user_doctor.id = ? AND user_doctor.worker_id = worker.id AND worker.schedule_id = schedule.id")
@@ -43,23 +76,25 @@ class DoctorScheduleRepository(private val transactor: ITransactor) {
         val checkResult = checkStatement.executeQuery()
 
         if (checkResult.next()) {
-            val updateStatement = prepareStatement("UPDATE schedule SET start_time = ?, end_time = ?, start_day = ?, end_day = ?, hours_for_rest = ? " +
+            val updateStatement = prepareStatement("UPDATE schedule SET start_time = ?, end_time = ?, start_day = ?, end_day = ?, rest_start_time = ?, rest_end_time = ? " +
                     "FROM user_doctor, worker " +
                     "WHERE user_doctor.id = ? AND user_doctor.worker_id = worker.id AND worker.schedule_id = schedule.id")
             updateStatement.setTime(1, Time.valueOf("$startTime:00"))
             updateStatement.setTime(2, Time.valueOf("$endTime:00"))
             updateStatement.setString(3, startDay)
             updateStatement.setString(4, endDay)
-            updateStatement.setFloat(5, hoursForRest.toFloat())
-            updateStatement.setInt(6, userDoctorId)
+            updateStatement.setTime(5, Time.valueOf("$restStartTime:00"))
+            updateStatement.setTime(6, Time.valueOf("$restEndTime:00"))
+            updateStatement.setInt(7, userDoctorId)
             updateStatement.executeUpdate()
         } else {
-            val updateStatement = prepareStatement("INSERT INTO schedule (start_time, end_time, start_day, end_day, hours_for_rest) VALUES (?, ?, ?, ?, ?) ")
+            val updateStatement = prepareStatement("INSERT INTO schedule (start_time, end_time, start_day, end_day, rest_start_time, rest_end_time) VALUES (?, ?, ?, ?, ?, ?) ")
             updateStatement.setTime(1, Time.valueOf("$startTime:00"))
             updateStatement.setTime(2, Time.valueOf("$endTime:00"))
             updateStatement.setString(3, startDay)
             updateStatement.setString(4, endDay)
-            updateStatement.setFloat(5, hoursForRest.toFloat())
+            updateStatement.setTime(5, Time.valueOf("$restStartTime:00"))
+            updateStatement.setTime(6, Time.valueOf("$restEndTime:00"))
             updateStatement.executeUpdate()
 
             val addedScheduleIdStatement = createStatement()

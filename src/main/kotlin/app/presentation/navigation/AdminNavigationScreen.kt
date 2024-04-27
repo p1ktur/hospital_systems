@@ -95,7 +95,7 @@ fun AdminNavigationScreen() {
             initialRoute = "/welcome"
         ) {
             scene(route = "/welcome") {
-                WelcomeScreen(AppArgs.DOCTOR)
+                WelcomeScreen(AppArgs.ADMIN)
             }
             scene(route = "/registration_worker/{forResult}") { navBackStackEntry ->
                 val forResult = navBackStackEntry.path<Boolean>("forResult") ?: false
@@ -208,6 +208,7 @@ fun AdminNavigationScreen() {
                         viewModel.onUiEvent(event)
                     },
                     userDoctorId = null,
+                    userClientId = null,
                     appArgs = AppArgs.ADMIN
                 )
             }

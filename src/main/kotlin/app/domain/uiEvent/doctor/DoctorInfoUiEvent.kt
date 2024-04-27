@@ -21,6 +21,7 @@ sealed class DoctorInfoUiEvent {
     data class UpdateEndDay(val endDay: String) : DoctorInfoUiEvent()
     data class UpdateStartTime(val startTime: String) : DoctorInfoUiEvent()
     data class UpdateEndTime(val endTime: String) : DoctorInfoUiEvent()
-    data class UpdateRestHours(val restHours: String) : DoctorInfoUiEvent()
+    data class UpdateRestStartTime(val startTime: String) : DoctorInfoUiEvent()
+    data class UpdateRestEndTime(val endTime: String) : DoctorInfoUiEvent()
     data class UpdateDesignationIndex(val index: Int) : DoctorInfoUiEvent()
 }

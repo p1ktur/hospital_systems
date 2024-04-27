@@ -126,6 +126,7 @@ fun ClientNavigationScreen() {
                         viewModel.onUiEvent(event)
                     },
                     userDoctorId = null,
+                    userClientId = userClientId,
                     appArgs = AppArgs.CLIENT
                 )
             }
@@ -173,6 +174,29 @@ fun ClientNavigationScreen() {
                     },
                     appArgs = AppArgs.CLIENT,
                     userClientId = userClientId
+                )
+            }
+            scene(route = "/find_worker/{forResult}") { navBackStackEntry ->
+                val forResult = navBackStackEntry.path<Boolean>("forResult") ?: false
+                val viewModel = koinViewModel<DoctorsViewModel>()
+                val uiState = viewModel.uiState.collectAsState()
+
+                LaunchedEffect(key1 = uiState.value.isLoading, block = {
+                    isLoading = uiState.value.isLoading
+                })
+
+                LaunchedEffect(key1 = true, block = {
+                    viewModel.onUiEvent(DoctorsUiEvent.Search(all = !forResult))
+                })
+
+                DoctorsScreen(
+                    navController = navController,
+                    uiState = uiState.value,
+                    onUiEvent = { event ->
+                        viewModel.onUiEvent(event)
+                    },
+                    appArgs = AppArgs.DOCTOR,
+                    forResult = forResult
                 )
             }
             scene(route = "/info/worker/{userDoctorId}") { navBackStackEntry ->

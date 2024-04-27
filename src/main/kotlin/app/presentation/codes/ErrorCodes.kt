@@ -6,6 +6,10 @@ fun parseDefaultErrorCode(code: Int): String {
         1002 -> "Specify schedule fully."
         1003 -> "Couldn't upload resource."
         1101 -> "Room at this location already exists."
+        1201 -> "Couldn't delete payed appointment."
+        1202 -> "Couldn't delete approved appointment."
+        1203 -> "You already have requested an appointment for this doctor."
+        1204 -> "Doctor has no schedule to request appointment."
         else -> "Unknown error."
     }
 }

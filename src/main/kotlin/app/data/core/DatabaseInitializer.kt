@@ -256,6 +256,9 @@ class DatabaseInitializer(
 
     private fun Connection.initAppointments(random: Random) {
         val now = LocalDateTime.now()
+        now.plusHours(1)
+        now.minusMinutes(now.minute.toLong())
+
         val allAppointments = 250..300
         val endedAppointments = 225..250
         val payedAppointments = 200..225
@@ -280,6 +283,7 @@ class DatabaseInitializer(
             }
         }
 
+        // TODO change so doctor's schedule and business counts
         for (i in 0 until random.nextInt(allAppointments)) {
             val randomClient = clients.random(random)
             val randomDoctor = doctors.random(random)

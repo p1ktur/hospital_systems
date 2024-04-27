@@ -286,4 +286,37 @@ class Vocabulary {
         "Saline solution",
         "Prescription medications"
     )
+
+    val sicknesses = arrayOf(
+        "Influenza",
+        "Diabetes",
+        "Cancer",
+        "Asthma",
+        "Arthritis",
+        "Hypertension",
+        "Depression",
+        "Anxiety",
+        "Migraine",
+        "Bronchitis",
+        "Pneumonia",
+        "Alzheimer's disease",
+        "Osteoporosis",
+        "Hepatitis",
+        "Tuberculosis",
+        "Parkinson's disease",
+        "Schizophrenia",
+        "Epilepsy",
+        "Multiple sclerosis",
+        "Chronic obstructive pulmonary disease (COPD)",
+        "Celiac disease",
+        "Crohn's disease",
+        "Ulcerative colitis",
+        "Psoriasis",
+        "Endometriosis",
+        "Fibromyalgia",
+        "Irritable bowel syndrome (IBS)",
+        "Lupus",
+        "Attention deficit hyperactivity disorder (ADHD)",
+        "Obsessive-compulsive disorder (OCD)",
+    )
 }

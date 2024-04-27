@@ -53,7 +53,8 @@ class StatisticsViewModel(
                         bestDoctorsByAppointments = data.bestDoctorsByAppointments,
                         roomDataForStatistics = data.roomDataForStatistics,
                         totalWorkers = data.totalWorkers,
-                        totalPatients = data.totalPatients
+                        totalPatients = data.totalPatients,
+                        sicknessStatistics = data.sicknessStatistics
                     )
                 }
             }

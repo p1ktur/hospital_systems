@@ -10,5 +10,6 @@ data class StatisticsFetchData(
     val bestDoctorsByAppointments: List<DoctorForStatistics>,
     val roomDataForStatistics: RoomDataForStatistics,
     val totalWorkers: Int,
-    val totalPatients: Int
+    val totalPatients: Int,
+    val sicknessStatistics: SicknessStatistics
 )

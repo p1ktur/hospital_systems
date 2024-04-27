@@ -106,36 +106,53 @@ fun AppointmentView(
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "on ${appointment.date}",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+            if (appointment.approved) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "on ${appointment.date}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
         }
-        Column(
-            horizontalAlignment = Alignment.End
-        ) {
-            Text(
-                text = if (appointmentResult == null) {
-                    "To be"
-                } else {
-                    "Finished for ${appointmentResult.price}"
-                },
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = if (payment == null) {
-                    "Not payed yet"
-                } else {
-                    "Payed ${payment.payedAmount}"
-                },
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+        if (appointment.approved) {
+            Column(
+                horizontalAlignment = Alignment.End
+            ) {
+                Text(
+                    text = if (appointmentResult == null) {
+                        "To be"
+                    } else {
+                        "Finished for ${appointmentResult.price}"
+                    },
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = if (payment == null) {
+                        "Not payed yet"
+                    } else {
+                        "Payed ${payment.payedAmount}"
+                    },
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        } else { //Not approved
+            Column(
+                horizontalAlignment = Alignment.End
+            ) {
+                Text(
+                    text = if (appArgs == AppArgs.CLIENT) {
+                        "Requested"
+                    } else {
+                        "Waiting"
+                    },
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
         }
     }
 }

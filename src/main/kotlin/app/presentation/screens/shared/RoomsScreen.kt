@@ -220,13 +220,7 @@ fun RoomsScreen(
                         }
                     } else if (isEdited && !forResult) {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable(
-                                    onClick = {
-                                        navController.goBackWith(room.id)
-                                    }
-                                ),
+                            modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.Bottom,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {

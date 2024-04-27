@@ -5,7 +5,8 @@ data class DoctorScheduleUiState(
     val endTime: String = "",
     val startDay: String = "",
     val endDay: String = "",
-    val hoursForRest: Float = 0f,
+    val restStartTime: String = "",
+    val restEndTime: String = "",
     val isLoading: Boolean = false,
     val errorCodes: List<Int> = emptyList(),
 )

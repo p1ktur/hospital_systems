@@ -222,6 +222,31 @@ fun StatisticsScreen(
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Divider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(1.dp),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        thickness = 1.dp
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    if (uiState.sicknessStatistics.containsData()) {
+                        DataChart(
+                            modifier = Modifier
+                                .height(500.dp)
+                                .aspectRatio(10f / 6f),
+                            chartTimeData = uiState.sicknessStatistics.toChartTimeData(),
+                            customLabels = uiState.sicknessStatistics.names(),
+                            chartSettings = defaultChartSettings().copy(yTitle = "Amount")
+                        )
+                    } else {
+                        Text(
+                            text = "No data for sicknesses",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
                     Spacer(modifier = Modifier.height(32.dp))
                 }
             }

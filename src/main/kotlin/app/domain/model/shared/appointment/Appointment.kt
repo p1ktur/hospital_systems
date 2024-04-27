@@ -8,5 +8,6 @@ data class Appointment(
     val userClientId: Int,
     val userDoctorId: Int,
     val resultId: Int,
-    val date: String
+    val date: String,
+    val approved: Boolean
 )

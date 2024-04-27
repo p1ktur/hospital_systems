@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.text.style.*
 import androidx.compose.ui.unit.*
 import app.domain.util.regex.*
 
@@ -175,6 +176,7 @@ fun OptionsTextField(
                         } else {
                             MaterialTheme.colorScheme.error
                         },
+                        textAlign = TextAlign.End
                     )
                 )
             }
@@ -199,6 +201,7 @@ fun OptionsTextField(
                             text = option,
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            textAlign = TextAlign.End
                         )
                     }
                 }

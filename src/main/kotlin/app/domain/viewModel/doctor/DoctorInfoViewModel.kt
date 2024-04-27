@@ -41,7 +41,8 @@ class DoctorInfoViewModel(
             is DoctorInfoUiEvent.UpdateEndDay -> updateEndDay(event.endDay)
             is DoctorInfoUiEvent.UpdateStartTime -> updateStartTime(event.startTime)
             is DoctorInfoUiEvent.UpdateEndTime -> updateEndTime(event.endTime)
-            is DoctorInfoUiEvent.UpdateRestHours -> updateRestHours(event.restHours)
+            is DoctorInfoUiEvent.UpdateRestStartTime -> updateRestStartTime(event.startTime)
+            is DoctorInfoUiEvent.UpdateRestEndTime -> updateRestEndTime(event.endTime)
             is DoctorInfoUiEvent.UpdateDesignationIndex -> updateDesignationIndex(event.index)
         }
     }
@@ -78,16 +79,17 @@ class DoctorInfoViewModel(
                         preloadedRooms = data.preloadedRooms
                     )
 
-                    when (val fetchScheduleResult = doctorScheduleRepository.fetchInfo(userWorkerId)) {
+                    when (val fetchScheduleResult = doctorScheduleRepository.fetchInfoSafely(userWorkerId)) {
                         is TransactorResult.Failure -> Unit
                         is TransactorResult.Success<*> -> {
-                            val data = fetchScheduleResult.data as DoctorScheduleData
+                            val scheduleData = fetchScheduleResult.data as DoctorScheduleData
                             _uiState.value = uiState.value.copy(
-                                startTime = data.startTime,
-                                endTime = data.endTime,
-                                startDay = data.startDay,
-                                endDay = data.endDay,
-                                hoursForRest = data.hoursForRest.toString()
+                                startTime = scheduleData.startTime,
+                                endTime = scheduleData.endTime,
+                                startDay = scheduleData.startDay,
+                                endDay = scheduleData.endDay,
+                                restStartTime = scheduleData.restStartTime,
+                                restEndTime = scheduleData.restEndTime
                             )
                         }
                     }
@@ -103,10 +105,10 @@ class DoctorInfoViewModel(
             isLoading = true
         )
 
-        val commonCond = (uiState.value.startTime + uiState.value.endTime + uiState.value.startDay + uiState.value.endDay + uiState.value.hoursForRest).trim().isNotEmpty()
-        val commonCond2 = uiState.value.startTime.isEmpty() || uiState.value.endTime.isEmpty() || uiState.value.startDay.isEmpty() || uiState.value.endDay.isEmpty() || uiState.value.hoursForRest.isEmpty()
+        val commonCondition = (uiState.value.startTime + uiState.value.endTime + uiState.value.startDay + uiState.value.endDay + uiState.value.restStartTime + uiState.value.restEndTime).trim().isNotEmpty()
+        val commonCondition2 = uiState.value.startTime.isEmpty() || uiState.value.endTime.isEmpty() || uiState.value.startDay.isEmpty() || uiState.value.endDay.isEmpty() || uiState.value.restStartTime.isEmpty() || uiState.value.restEndTime.isEmpty()
 
-        if (commonCond && commonCond2) {
+        if (commonCondition && commonCondition2) {
             _uiState.value = uiState.value.copy(
                 isLoading = false,
                 errorCodes = listOf(1002)
@@ -143,7 +145,8 @@ class DoctorInfoViewModel(
                         endTime = uiState.value.endTime,
                         startDay = uiState.value.startDay,
                         endDay = uiState.value.endDay,
-                        hoursForRest = uiState.value.hoursForRest
+                        restStartTime = uiState.value.restStartTime,
+                        restEndTime = uiState.value.restEndTime
                     )
                 }
             )
@@ -208,7 +211,9 @@ class DoctorInfoViewModel(
 
     private fun updateEndTime(endTime: String) = _uiState.update { it.copy(endTime = endTime) }
 
-    private fun updateRestHours(restHours: String) = _uiState.update { it.copy(hoursForRest = restHours) }
+    private fun updateRestStartTime(startTime: String) = _uiState.update { it.copy(restStartTime = startTime) }
+
+    private fun updateRestEndTime(endTime: String) = _uiState.update { it.copy(restEndTime = endTime) }
 
     private fun updateDesignationIndex(index: Int) = _uiState.update { it.copy(designationIndex = index) }
 }

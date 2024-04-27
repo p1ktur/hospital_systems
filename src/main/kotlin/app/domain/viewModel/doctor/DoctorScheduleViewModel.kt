@@ -28,7 +28,7 @@ class DoctorScheduleViewModel(private val doctorScheduleRepository: DoctorSchedu
         )
 
         viewModelScope.launch(Dispatchers.IO) {
-            when (val fetchInfoResult = doctorScheduleRepository.fetchInfo(userWorkerId)) {
+            when (val fetchInfoResult = doctorScheduleRepository.fetchInfoSafely(userWorkerId)) {
                 is TransactorResult.Failure -> Unit
                 is TransactorResult.Success<*> -> {
                     val data = fetchInfoResult.data as DoctorScheduleData
@@ -38,7 +38,8 @@ class DoctorScheduleViewModel(private val doctorScheduleRepository: DoctorSchedu
                         endTime = data.endTime,
                         startDay = data.startDay,
                         endDay = data.endDay,
-                        hoursForRest = data.hoursForRest
+                        restStartTime = data.restStartTime,
+                        restEndTime = data.restEndTime
                     )
                 }
             }

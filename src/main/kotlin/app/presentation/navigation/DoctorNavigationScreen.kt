@@ -156,6 +156,7 @@ fun DoctorNavigationScreen() {
                         viewModel.onUiEvent(event)
                     },
                     userDoctorId = userDoctorId,
+                    userClientId = null,
                     appArgs = AppArgs.DOCTOR
                 )
             }
