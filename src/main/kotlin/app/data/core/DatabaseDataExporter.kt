@@ -27,6 +27,7 @@ class DatabaseDataExporter(private val transactor: ITransactor) {
                     "'phone', phone," +
                     "'email', email," +
                     "'salary', salary," +
+                    "'position', position," +
                     "'can_receive_appointments', can_receive_appointments," +
                     "'registration_date', creation_date," +
                     "'schedule', json_build_object(" +
@@ -34,7 +35,8 @@ class DatabaseDataExporter(private val transactor: ITransactor) {
                         "'end_time', end_time," +
                         "'start_day', start_day," +
                         "'end_day', end_day," +
-                        "'hours_for_rest', hours_for_rest" +
+                        "'rest_start_time', rest_start_time," +
+                        "'rest_end_time', rest_end_time" +
                     ")" +
                 ")" +
             ") FROM worker LEFT JOIN schedule ON schedule.id = worker.schedule_id"

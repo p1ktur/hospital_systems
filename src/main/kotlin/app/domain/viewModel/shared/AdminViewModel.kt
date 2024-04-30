@@ -21,18 +21,15 @@ class AdminViewModel(
         isLoading.value = true
 
         viewModelScope.launch(Dispatchers.IO) {
-            when (databaseDataExporter.exportDataToAFile(path)) {
-//                is TransactorResult.Failure -> {
-//                    exportingData = false
-//                    exportedFilePath.value = null
-//                }
-//                is TransactorResult.Success<*> -> {
-//                    val path = exportResult.data as String
-//
-//                    exportingData = false
-//                    exportedFilePath.value = path
-//                }
-                else -> Unit
+            when (val exportResult = databaseDataExporter.exportDataToAFile(path)) {
+                is TransactorResult.Failure -> {
+                    isLoading.value = false
+                }
+                is TransactorResult.Success<*> -> {
+                    val path = exportResult.data as String
+
+                    isLoading.value = false
+                }
             }
         }
     }
